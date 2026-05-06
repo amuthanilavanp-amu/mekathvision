@@ -21,7 +21,6 @@ export default function UploadPage() {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
       if (user) {
-        // Get story count
         const { count } = await supabase
           .from('stories')
           .select('*', { count: 'exact', head: true })
@@ -39,79 +38,131 @@ export default function UploadPage() {
     if (storyCount >= 12) return alert('You have reached the maximum limit of 12 stories.');
 
     setUploading(true);
-    // Implementation for file upload to Supabase Storage would go here
-    // For now, this is a placeholder for the logic
     setTimeout(() => {
       setUploading(false);
-      alert('This is a demo. File upload logic is being configured.');
+      alert('This is a demo. Your story and thumbnail would be uploaded to Supabase Storage in the production version.');
     }, 2000);
   };
 
-  if (loading) return <div style={{ padding: '100px', textAlign: 'center' }}>Loading...</div>;
+  if (loading) return (
+    <div className="login-container">
+      <div className="serif" style={{ fontSize: '2rem' }}>Loading Vision...</div>
+    </div>
+  );
 
   if (!user) {
     return (
-      <div className="hero" style={{ justifyContent: 'center', textAlign: 'center' }}>
-         <div className="glass-card">
-            <h1 className="serif">Login Required</h1>
-            <p style={{ margin: '20px 0' }}>You must be logged in to upload stories.</p>
-            <Link href="/" className="btn btn-primary">Back to Home</Link>
-         </div>
+      <div className="login-container">
+        <div className="login-card">
+          <h1 className="serif">Access Restricted</h1>
+          <p style={{ margin: '20px 0', color: 'var(--color-text-dim)' }}>You must be logged in to share your tales with the world.</p>
+          <div style={{ display: 'flex', gap: '15px', justifyContent: 'center' }}>
+            <Link href="/login" className="login-btn" style={{ textDecoration: 'none', width: 'auto', padding: '12px 30px' }}>Sign In</Link>
+            <Link href="/" className="pill-btn" style={{ padding: '12px 30px' }}>Home</Link>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={{ padding: '100px 10%' }}>
-      <h1 className="serif" style={{ fontSize: '3rem', marginBottom: '20px' }}>Upload Your Story</h1>
-      <p style={{ marginBottom: '50px', opacity: 0.7 }}>You have uploaded {storyCount} / 12 stories.</p>
+    <main style={{ minHeight: '100vh', background: 'var(--color-bg)', padding: '120px 5%' }}>
+      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+        <header style={{ marginBottom: '60px', textAlign: 'center' }}>
+          <h1 className="serif" style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', marginBottom: '15px' }}>Manifest Your Tale</h1>
+          <p style={{ color: 'var(--color-text-dim)' }}>
+            Share your imagination. You have {storyCount} of 12 stories manifested.
+          </p>
+        </header>
 
-      <form onSubmit={handleUpload} className="glass-card" style={{ maxWidth: '600px' }}>
-        <div className="field">
-          <label>Title</label>
-          <input type="text" required value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} />
+        <form onSubmit={handleUpload} className="login-card" style={{ maxWidth: '100%', textAlign: 'left' }}>
+          <div className="form-group">
+            <label>Story Title</label>
+            <input 
+              type="text" 
+              required 
+              placeholder="Enter a title for your story..."
+              value={formData.title} 
+              onChange={e => setFormData({...formData, title: e.target.value})} 
+            />
+          </div>
+          
+          <div className="form-group">
+            <label>Genre / Category</label>
+            <select 
+              required 
+              value={formData.category} 
+              onChange={e => setFormData({...formData, category: e.target.value})}
+              style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '15px', color: 'white' }}
+            >
+              <option value="">Select a Genre</option>
+              <option value="Fantasy">Fantasy</option>
+              <option value="Horror">Horror</option>
+              <option value="Love">Love</option>
+              <option value="Sci-Fi">Sci-Fi</option>
+              <option value="Adventure">Adventure</option>
+            </select>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '25px' }}>
+            <div className="form-group">
+              <label>Thumbnail Image (Required)</label>
+              <div style={{ position: 'relative' }}>
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  required 
+                  id="thumb"
+                  style={{ opacity: 0, position: 'absolute', inset: 0, cursor: 'pointer' }}
+                />
+                <div style={{ 
+                  background: 'rgba(255,255,255,0.03)', 
+                  border: '2px dashed var(--glass-border)', 
+                  borderRadius: '12px', 
+                  padding: '30px', 
+                  textAlign: 'center',
+                  color: 'var(--color-text-dim)'
+                }}>
+                  📸 Select Thumbnail
+                </div>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>Story Document (PDF/DOC)</label>
+              <div style={{ position: 'relative' }}>
+                <input 
+                  type="file" 
+                  accept=".pdf,.doc,.docx" 
+                  required 
+                  id="story"
+                  style={{ opacity: 0, position: 'absolute', inset: 0, cursor: 'pointer' }}
+                />
+                <div style={{ 
+                  background: 'rgba(255,255,255,0.03)', 
+                  border: '2px dashed var(--glass-border)', 
+                  borderRadius: '12px', 
+                  padding: '30px', 
+                  textAlign: 'center',
+                  color: 'var(--color-text-dim)'
+                }}>
+                  📄 Upload Story
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" className="login-btn" disabled={uploading}>
+            {uploading ? 'Manifesting...' : 'Manifest Story'}
+          </button>
+        </form>
+
+        <div style={{ marginTop: '40px', textAlign: 'center' }}>
+          <Link href="/" style={{ color: 'var(--color-text-dim)', textDecoration: 'none', fontSize: '0.9rem' }}>
+            ← Back to Sanctuary
+          </Link>
         </div>
-        
-        <div className="field">
-          <label>Category</label>
-          <select required value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
-            <option value="">Select Category</option>
-            <option value="Fantasy">Fantasy</option>
-            <option value="Horror">Horror</option>
-            <option value="Love">Love</option>
-            <option value="Sci-Fi">Sci-Fi</option>
-          </select>
-        </div>
-
-        <div className="field">
-          <label>Thumbnail Image</label>
-          <input type="file" accept="image/*" required />
-        </div>
-
-        <div className="field">
-          <label>Story File (PDF/DOC/PPT)</label>
-          <input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx" required />
-        </div>
-
-        <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '20px' }} disabled={uploading}>
-          {uploading ? 'Uploading...' : 'Publish Story'}
-        </button>
-      </form>
-
-      <style jsx>{`
-        .field { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: 600; opacity: 0.8; }
-        input, select, textarea {
-          width: 100%;
-          padding: 12px;
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: 8px;
-          color: white;
-          outline: none;
-        }
-        input:focus { border-color: var(--color-primary); }
-      `}</style>
-    </div>
+      </div>
+    </main>
   );
 }

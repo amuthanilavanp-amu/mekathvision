@@ -1,34 +1,27 @@
 import Link from 'next/link';
 
-const characters = [
-  { name: 'Raris', img: '/assets/character_raris_1778049701954.png' },
-  { name: 'Linner', img: '/assets/character_linner_1778049717169.png' },
-  { name: 'Landa', img: '/assets/character_landa_1778049912574.png' },
-  { name: 'Evnits', img: '/assets/character_evnits_1778049928937.png' },
-  { name: 'Martha', img: '/assets/character_martha_1778049952538.png' },
-  { name: 'Vemper', img: '/assets/character_raris_1778049701954.png' }, // Reuse for demo
-  { name: 'Stores', img: '/assets/character_linner_1778049717169.png' }, // Reuse for demo
-];
-
 export default function Home() {
   return (
     <main>
       {/* Navbar */}
       <nav className="navbar">
-        <Link href="/" className="nav-logo serif">Maketh Vision</Link>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <Link href="/" className="nav-logo serif">Maketh Vision</Link>
+          <span style={{ fontSize: '0.7rem', color: 'var(--color-primary)', letterSpacing: '2px', textTransform: 'uppercase', marginTop: '4px' }}>
+            By Joshua Amuthanilavan
+          </span>
+        </div>
         
         <div className="nav-links">
-          <Link href="#" className="nav-link active">Maket Us</Link>
-          <Link href="#" className="nav-link">Feature</Link>
-          <Link href="#" className="nav-link">Games</Link>
-          <Link href="#" className="nav-link">Resources</Link>
-          <Link href="#" className="nav-link">About</Link>
+          <Link href="/" className="nav-link active">Home</Link>
+          <Link href="/upload" className="nav-link">Upload</Link>
+          <Link href="/explore" className="nav-link">Explore</Link>
+          <Link href="/about" className="nav-link">About</Link>
         </div>
 
         <div className="nav-actions">
-          <Link href="/explore" className="pill-btn">explor</Link>
-          <Link href="/settings" className="pill-btn">settings</Link>
-          <Link href="/contact" className="pill-btn">contact</Link>
+          <Link href="/explore" className="pill-btn">explore</Link>
+          <Link href="/upload" className="pill-btn">upload</Link>
           <Link href="/login" className="pill-btn primary">login</Link>
         </div>
       </nav>
@@ -45,36 +38,35 @@ export default function Home() {
         <div className="hero-content">
           <h1 className="hero-title serif">The Storying</h1>
           <p className="hero-description">
-            Lorem ipsum dolor sit amet enel, consectetuer adipiscing elit, sed do eiusmod tempor incididunt ut labore et tistreet dolore magna aliqua. Ut enim ad minis veniam, enuio, musrud exercitation ullamico labro aliquip ex ea commodo outs ncsstrentur roneerl imtersmetinii net in nolpstatt sult mianaimral muitiat. Duis ate irure color commodo consequat.
+            Experience storytelling like never before. Dive into a world of imagination, where every tale is a cinematic journey crafted with passion and vision.
           </p>
-          <Link href="/explore" className="hero-cta">Explore Stories</Link>
+          <div style={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
+            <Link href="/explore" className="hero-cta">Explore Stories</Link>
+            <Link href="/upload" className="hero-cta" style={{ background: 'transparent', border: '1px solid var(--color-accent)', color: 'var(--color-accent)' }}>
+              Share Your Tale
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* Character Profiles Section */}
-      <section className="section">
-        <div className="section-header">
-          <div className="section-title-wrap">
-            <h2 className="section-title serif">Character Profiles</h2>
-          </div>
-          <div className="section-description">
-             <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed do eiusmod tempor incididunt ut labore.</p>
-             <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed do eiusmod tempor incididunt ut labore.</p>
-             <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed do eiusmod tempor incididunt ut labore.</p>
-          </div>
-        </div>
-
-        <div className="character-grid">
-          {characters.map((char, index) => (
-            <div key={index} className="character-card">
-              <img src={char.img} alt={char.name} className="character-img" />
-              <div className="character-name">{char.name}</div>
-            </div>
-          ))}
+      {/* Quote / Intro Section (Replacing Characters) */}
+      <section className="section" style={{ textAlign: 'center' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+          <h2 className="section-title serif" style={{ fontSize: '3rem', marginBottom: '40px', textAlign: 'center', border: 'none' }}>
+            "Every story is a vision waiting to be told."
+          </h2>
+          <p style={{ color: 'var(--color-text-dim)', fontSize: '1.2rem', fontStyle: 'italic' }}>
+            - Joshua Amuthanilavan
+          </p>
         </div>
       </section>
 
-      {/* Footer / Extra Content could go here */}
+      {/* Simple Footer */}
+      <footer style={{ padding: '60px 5%', borderTop: '1px solid var(--glass-border)', textAlign: 'center' }}>
+        <p style={{ color: 'var(--color-text-dim)', fontSize: '0.9rem' }}>
+          © 2026 Maketh Vision. All rights reserved. | Crafted with ❤️ by Joshua Amuthanilavan
+        </p>
+      </footer>
     </main>
   );
 }
