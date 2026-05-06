@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Maketh Vision — A cinematic storytelling platform. Explore, discover, and read amazing stories across Fantasy, Horror, Sci-Fi, and more.">
+  <title>Maketh Vision — Storytelling Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <!-- Cherry Blossom Petals -->
+  <div id="cherry-blossoms" class="cherry-container"></div>
+
+  <!-- Header Overlay -->
+  <div class="fantasy-header">
+    <div class="header-tag">THE STORYING</div>
+    <h1 class="main-title">MAKETH VISION</h1>
+    <p class="main-subtitle">A cinematic sanctuary for your narratives. Step into the fantasy world and bring your stories to life with beautiful visual representations.</p>
+  </div>
+
+  <!-- Main Content Wrapper -->
+  <div class="content-wrapper">
+    <!-- Header (Functional) -->
+    <header id="main-header" class="header">
+      <nav class="header-nav">
+        <a href="#" class="nav-link" data-page="home">Home</a>
+        <a href="#" class="nav-link" data-page="stories">Stories</a>
+        <a href="#" class="nav-link" data-page="upload">Upload</a>
+      </nav>
+      <div class="header-right">
+        <button class="icon-btn" id="search-toggle">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        </button>
+        <div id="auth-area">
+          <button class="btn btn-primary" id="login-btn">Sign In</button>
+        </div>
+        <div id="user-area" class="user-area hidden">
+          <button class="user-avatar-btn" id="user-menu-btn">
+            <span id="user-initial">U</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+  <!-- Search Bar Overlay -->
+  <div class="search-overlay hidden" id="search-overlay">
+    <div class="search-bar-container">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="search-input" placeholder="Search stories by title..." autocomplete="off">
+      <button class="search-close" id="search-close">✕</button>
+    </div>
+  </div>
+
+  <!-- Auth Modal -->
+  <div class="modal-overlay hidden" id="auth-modal">
+    <div class="modal glass-card">
+      <button class="modal-close" id="modal-close">✕</button>
+      <div class="modal-tabs">
+        <button class="tab-btn active" data-tab="login">Sign In</button>
+        <button class="tab-btn" data-tab="register">Sign Up</button>
+        <button class="tab-btn" data-tab="otp">Phone OTP</button>
+      </div>
+      <!-- Login Tab -->
+      <div class="tab-content active" id="tab-login">
+        <h2 class="modal-title">Welcome Back</h2>
+        <p class="modal-subtitle">Sign in to continue your journey</p>
+        <form id="login-form" class="auth-form">
+          <div class="form-group">
+            <label for="login-email">Email</label>
+            <input type="email" id="login-email" required placeholder="your@email.com">
+          </div>
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" required placeholder="••••••••" minlength="8">
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">Sign In</button>
+          <p class="form-footer">Don't have an account? <a href="#" class="switch-tab" data-tab="register">Sign Up</a></p>
+        </form>
+      </div>
+      <!-- Register Tab -->
+      <div class="tab-content" id="tab-register">
+        <h2 class="modal-title">Create Account</h2>
+        <p class="modal-subtitle">Join the storytelling community</p>
+        <form id="register-form" class="auth-form">
+          <div class="form-group">
+            <label for="reg-username">Username</label>
+            <input type="text" id="reg-username" required placeholder="unique_username" minlength="3" maxlength="30" pattern="[a-zA-Z0-9_]+">
+            <span class="field-hint">Letters, numbers, underscores only</span>
+          </div>
+          <div class="form-group">
+            <label for="reg-email">Email</label>
+            <input type="email" id="reg-email" required placeholder="your@email.com">
+          </div>
+          <div class="form-group">
+            <label for="reg-password">Password</label>
+            <input type="password" id="reg-password" required placeholder="Min 8 characters" minlength="8">
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">Create Account</button>
+          <p class="form-footer">Already have an account? <a href="#" class="switch-tab" data-tab="login">Sign In</a></p>
+        </form>
+      </div>
+      <!-- OTP Tab -->
+      <div class="tab-content" id="tab-otp">
+        <h2 class="modal-title">Phone Verification</h2>
+        <p class="modal-subtitle">Sign in with your mobile number</p>
+        <form id="otp-form" class="auth-form">
+          <div id="otp-step-1">
+            <div class="form-group">
+              <label for="otp-phone">Phone Number</label>
+              <input type="tel" id="otp-phone" required placeholder="+91 XXXXX XXXXX">
+            </div>
+            <button type="button" class="btn btn-primary btn-full" id="send-otp-btn">Send OTP</button>
+          </div>
+          <div id="otp-step-2" class="hidden">
+            <div class="form-group">
+              <label for="otp-code">Enter OTP</label>
+              <input type="text" id="otp-code" required placeholder="6-digit code" maxlength="6" pattern="[0-9]{6}">
+            </div>
+            <button type="submit" class="btn btn-primary btn-full">Verify & Sign In</button>
+            <button type="button" class="btn btn-ghost btn-full" id="resend-otp">Resend OTP</button>
+          </div>
+        </form>
+      </div>
+      <div id="auth-message" class="auth-message hidden"></div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- ====== PAGES ====== -->
+
+  <!-- HOME PAGE -->
+  <main id="page-home" class="page active">
+    <section class="hero">
+      <div class="hero-bg"></div>
+      <div class="hero-overlay"></div>
+      
+      <div class="gate-container">
+        <div class="gate-card glass-card animate-fade-up">
+          <h2 class="gate-title">BEGIN JOURNEY</h2>
+          <form id="gate-form" class="gate-form">
+            <div class="gate-input-wrap">
+              <input type="text" id="gate-name" placeholder="Architect Name" required>
+            </div>
+            <div class="gate-input-wrap">
+              <input type="password" id="gate-passcode" placeholder="Passcode" required>
+            </div>
+            <button type="submit" class="btn btn-gate">ENTER REALM</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="hero-scroll-indicator">
+        <span>Scroll</span>
+      </div>
+    </section>
+
+    <section class="section categories-section">
+      <div class="container">
+        <h2 class="section-title">Explore Genres</h2>
+        <p class="section-subtitle">Find your next favorite story</p>
+        <div class="categories-grid" id="categories-grid"></div>
+      </div>
+    </section>
+
+    <section class="section featured-section">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Latest Stories</h2>
+            <p class="section-subtitle">Fresh tales from our community</p>
+          </div>
+          <button class="btn btn-outline" data-page="stories">View All →</button>
+        </div>
+        <div class="stories-grid" id="featured-stories"></div>
+        <div class="empty-state hidden" id="featured-empty">
+          <div class="empty-icon">📚</div>
+          <h3>No stories yet</h3>
+          <p>Be the first to share your tale!</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section cta-section">
+      <div class="container">
+        <div class="cta-card glass-card">
+          <h2>Ready to Share Your Story?</h2>
+          <p>Join our community and share your imagination with the world</p>
+          <button class="btn btn-glow" id="cta-upload-btn">Start Writing →</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- STORIES PAGE -->
+  <main id="page-stories" class="page">
+    <section class="page-header">
+      <div class="container">
+        <h1 class="page-title">All Stories</h1>
+        <p class="page-subtitle">Browse our collection of tales</p>
+      </div>
+    </section>
+    <section class="section">
+      <div class="container">
+        <div class="filter-bar" id="category-filter"></div>
+        <div class="stories-grid" id="all-stories"></div>
+        <div class="empty-state hidden" id="stories-empty">
+          <div class="empty-icon">🔍</div>
+          <h3>No stories found</h3>
+          <p>Try a different category or check back later</p>
+        </div>
+        <div class="load-more-wrap hidden" id="load-more-wrap">
+          <button class="btn btn-outline" id="load-more-btn">Load More</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- STORY DETAIL PAGE -->
+  <main id="page-detail" class="page">
+    <section class="section">
+      <div class="container">
+        <button class="btn btn-ghost back-btn" id="back-to-stories">← Back to Stories</button>
+        <div class="detail-layout" id="story-detail"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- UPLOAD PAGE -->
+  <main id="page-upload" class="page">
+    <section class="page-header">
+      <div class="container">
+        <h1 class="page-title">Upload Your Story</h1>
+        <p class="page-subtitle">Share your tale with the world</p>
+        <div class="upload-counter" id="upload-counter">Stories: 0 / 12</div>
+      </div>
+    </section>
+    <section class="section">
+      <div class="container container-sm">
+        <div class="upload-gate hidden" id="upload-gate">
+          <div class="glass-card text-center">
+            <div class="empty-icon">🔐</div>
+            <h3>Sign in Required</h3>
+            <p>You need to sign in to upload stories</p>
+            <button class="btn btn-glow" id="gate-login-btn">Sign In</button>
+          </div>
+        </div>
+        <form class="upload-form glass-card hidden" id="upload-form">
+          <div class="form-group">
+            <label for="story-title">Story Title *</label>
+            <input type="text" id="story-title" required placeholder="Enter your story title" maxlength="100">
+          </div>
+          <div class="form-group">
+            <label for="story-category">Category *</label>
+            <select id="story-category" required>
+              <option value="">Select a category</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="story-desc">Description</label>
+            <textarea id="story-desc" placeholder="Brief description of your story..." rows="3" maxlength="500"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Thumbnail Image *</label>
+            <div class="file-drop-zone" id="thumb-drop">
+              <input type="file" id="thumb-input" accept="image/*" hidden>
+              <div class="drop-content" id="thumb-preview-area">
+                <div class="drop-icon">🖼️</div>
+                <p>Click or drag to upload thumbnail</p>
+                <span class="drop-hint">JPG, PNG, WebP (max 2MB)</span>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Story File *</label>
+            <div class="file-drop-zone" id="file-drop">
+              <input type="file" id="file-input" accept=".pdf,.doc,.docx,.ppt,.pptx" hidden>
+              <div class="drop-content" id="file-preview-area">
+                <div class="drop-icon">📄</div>
+                <p>Click or drag to upload story file</p>
+                <span class="drop-hint">PDF, DOC, DOCX, PPT, PPTX (max 10MB)</span>
+              </div>
+            </div>
+          </div>
+          <div class="progress-bar-wrap hidden" id="upload-progress-wrap">
+            <div class="progress-bar">
+              <div class="progress-fill" id="upload-progress"></div>
+            </div>
+            <span class="progress-text" id="progress-text">Uploading... 0%</span>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full btn-lg" id="submit-upload-btn">
+            <span>Publish Story</span>
+          </button>
+        </form>
+        <div class="upload-limit-reached glass-card hidden" id="upload-limit">
+          <div class="empty-icon">🚫</div>
+          <h3>Upload Limit Reached</h3>
+          <p>You've uploaded the maximum of 12 stories.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- PROFILE PAGE -->
+  <main id="page-profile" class="page">
+    <section class="page-header">
+      <div class="container">
+        <div class="profile-header" id="profile-header">
+          <div class="profile-avatar" id="profile-avatar">U</div>
+          <div class="profile-info">
+            <h1 class="page-title" id="profile-username">Username</h1>
+            <p class="page-subtitle" id="profile-email">email@example.com</p>
+            <p class="profile-joined" id="profile-joined">Joined: —</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="section">
+      <div class="container">
+        <div class="profile-tabs">
+          <button class="tab-btn active" data-ptab="my-stories">My Stories</button>
+          <button class="tab-btn" data-ptab="liked">Liked</button>
+          <button class="tab-btn" data-ptab="saved">Saved</button>
+        </div>
+        <div class="profile-tab-content active" id="ptab-my-stories">
+          <div class="stories-grid" id="my-stories"></div>
+          <div class="empty-state hidden" id="my-stories-empty">
+            <div class="empty-icon">✍️</div>
+            <h3>No stories yet</h3>
+            <p>Upload your first story to see it here</p>
+            <button class="btn btn-glow" data-page="upload">Upload Story</button>
+          </div>
+        </div>
+        <div class="profile-tab-content" id="ptab-liked">
+          <div class="stories-grid" id="liked-stories"></div>
+          <div class="empty-state hidden" id="liked-empty">
+            <div class="empty-icon">❤️</div>
+            <h3>No liked stories</h3>
+            <p>Like stories to save them here</p>
+          </div>
+        </div>
+        <div class="profile-tab-content" id="ptab-saved">
+          <div class="stories-grid" id="saved-stories"></div>
+          <div class="empty-state hidden" id="saved-empty">
+            <div class="empty-icon">🔖</div>
+            <h3>No saved stories</h3>
+            <p>Save stories to read later</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer" id="main-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo">
+            <span class="logo-icon">◈</span>
+            <span class="logo-text">Maketh Vision</span>
+          </div>
+          <p>A cinematic storytelling platform where imagination meets artistry.</p>
+        </div>
+        <div class="footer-links">
+          <h4>Explore</h4>
+          <a href="#" data-page="home">Home</a>
+          <a href="#" data-page="stories">All Stories</a>
+          <a href="#" data-page="upload">Upload</a>
+        </div>
+        <div class="footer-links">
+          <h4>Genres</h4>
+          <a href="#" data-category="fantasy">Fantasy</a>
+          <a href="#" data-category="horror">Horror</a>
+          <a href="#" data-category="love">Love</a>
+          <a href="#" data-category="adventure">Adventure</a>
+          <a href="#" data-category="love">Motivation</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 Maketh Vision. Created by <strong>Joshua Amuthanilavan</strong></p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

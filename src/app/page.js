@@ -1,66 +1,80 @@
 import Link from 'next/link';
 
+const characters = [
+  { name: 'Raris', img: '/assets/character_raris_1778049701954.png' },
+  { name: 'Linner', img: '/assets/character_linner_1778049717169.png' },
+  { name: 'Landa', img: '/assets/character_landa_1778049912574.png' },
+  { name: 'Evnits', img: '/assets/character_evnits_1778049928937.png' },
+  { name: 'Martha', img: '/assets/character_martha_1778049952538.png' },
+  { name: 'Vemper', img: '/assets/character_raris_1778049701954.png' }, // Reuse for demo
+  { name: 'Stores', img: '/assets/character_linner_1778049717169.png' }, // Reuse for demo
+];
+
 export default function Home() {
   return (
     <main>
-      {/* Sidebar Nav */}
-      <nav className="sidebar">
-        <Link href="/" className="nav-item active">Home</Link>
-        <Link href="/stories" className="nav-item">Genres</Link>
-        <Link href="/contact" className="nav-item">Contact</Link>
-        <Link href="/news" className="nav-item">News</Link>
+      {/* Navbar */}
+      <nav className="navbar">
+        <Link href="/" className="nav-logo serif">Maketh Vision</Link>
+        
+        <div className="nav-links">
+          <Link href="#" className="nav-link active">Maket Us</Link>
+          <Link href="#" className="nav-link">Feature</Link>
+          <Link href="#" className="nav-link">Games</Link>
+          <Link href="#" className="nav-link">Resources</Link>
+          <Link href="#" className="nav-link">About</Link>
+        </div>
+
+        <div className="nav-actions">
+          <Link href="/explore" className="pill-btn">explor</Link>
+          <Link href="/settings" className="pill-btn">settings</Link>
+          <Link href="/contact" className="pill-btn">contact</Link>
+          <Link href="/login" className="pill-btn primary">login</Link>
+        </div>
       </nav>
 
       {/* Hero Section */}
       <section className="hero">
-        <div className="hero-content">
-          <p className="hero-subtitle">Dive into the world of Stories</p>
-          <h1 className="hero-title serif">Explore, Discover, and Read Your Favorite Stories</h1>
-          <div className="hero-btns">
-            <Link href="/stories" className="btn btn-secondary">Browse Stories</Link>
-            <Link href="/upload" className="btn btn-primary">Upload Story</Link>
-          </div>
-        </div>
+        <img 
+          src="/assets/hero_background_1778049679282.png" 
+          alt="Hero background" 
+          className="hero-bg"
+        />
+        <div className="hero-overlay"></div>
         
-        {/* Top Right Icons */}
-        <div style={{ position: 'absolute', top: '40px', right: '40px', display: 'flex', gap: '20px', z-index: 10 }}>
-           <button className="glass-btn">🔍</button>
-           <button className="glass-btn">●●●</button>
+        <div className="hero-content">
+          <h1 className="hero-title serif">The Storying</h1>
+          <p className="hero-description">
+            Lorem ipsum dolor sit amet enel, consectetuer adipiscing elit, sed do eiusmod tempor incididunt ut labore et tistreet dolore magna aliqua. Ut enim ad minis veniam, enuio, musrud exercitation ullamico labro aliquip ex ea commodo outs ncsstrentur roneerl imtersmetinii net in nolpstatt sult mianaimral muitiat. Duis ate irure color commodo consequat.
+          </p>
+          <Link href="/explore" className="hero-cta">Explore Stories</Link>
         </div>
       </section>
 
-      {/* Categories / Stories Grid could go here */}
-      <section style={{ padding: '100px 10%' }}>
-        <h2 className="serif" style={{ fontSize: '3rem', marginBottom: '50px' }}>Featured Genres</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '30px' }}>
-          {['Fantasy', 'Horror', 'Love', 'Motivation', 'Adventure', 'Sci-Fi'].map((genre) => (
-            <div key={genre} className="glass-card" style={{ textAlign: 'center', transition: 'transform 0.3s' }}>
-              <h3 className="serif" style={{ fontSize: '1.5rem', marginBottom: '10px' }}>{genre}</h3>
-              <p style={{ opacity: 0.6 }}>Explore the magic of {genre.toLowerCase()} tales.</p>
+      {/* Character Profiles Section */}
+      <section className="section">
+        <div className="section-header">
+          <div className="section-title-wrap">
+            <h2 className="section-title serif">Character Profiles</h2>
+          </div>
+          <div className="section-description">
+             <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed do eiusmod tempor incididunt ut labore.</p>
+             <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed do eiusmod tempor incididunt ut labore.</p>
+             <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed do eiusmod tempor incididunt ut labore.</p>
+          </div>
+        </div>
+
+        <div className="character-grid">
+          {characters.map((char, index) => (
+            <div key={index} className="character-card">
+              <img src={char.img} alt={char.name} className="character-img" />
+              <div className="character-name">{char.name}</div>
             </div>
           ))}
         </div>
       </section>
 
-      <style jsx>{`
-        .glass-btn {
-          background: rgba(255, 255, 255, 0.1);
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          color: white;
-          width: 50px;
-          height: 50px;
-          border-radius: 50%;
-          cursor: pointer;
-          backdrop-filter: blur(10px);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 1.2rem;
-        }
-        .glass-btn:hover {
-          background: rgba(255, 255, 255, 0.2);
-        }
-      `}</style>
+      {/* Footer / Extra Content could go here */}
     </main>
   );
 }
