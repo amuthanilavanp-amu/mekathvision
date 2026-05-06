@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { getSupabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 
 export default function UploadPage() {
@@ -14,7 +14,7 @@ export default function UploadPage() {
     description: ''
   });
 
-  const supabase = getSupabase();
+  // Remove const supabase = getSupabase(); as we import it directly
 
   useEffect(() => {
     async function checkUser() {
