@@ -19,7 +19,7 @@ function LoginContent() {
     setError(null);
 
     const sanitizedUsername = username.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-    const dummyEmail = `${sanitizedUsername}.seeker@maketh-vision.com`;
+    const dummyEmail = `${sanitizedUsername}.mv@gmail.com`;
 
     try {
       const { data, error: loginError } = await supabase.auth.signInWithPassword({
@@ -32,10 +32,9 @@ function LoginContent() {
       router.push('/');
       router.refresh();
     } catch (err) {
-      // Hide internal email from error messages
       let msg = err.message;
-      if (msg.includes('@maketh-vision.com')) {
-        msg = msg.replace(/[a-z0-9.]+@maketh-vision\.com/gi, 'username');
+      if (msg.toLowerCase().includes('email')) {
+        msg = "Incorrect username or password.";
       }
       setError(msg === 'Invalid login credentials' ? 'Incorrect username or password.' : msg);
     } finally {

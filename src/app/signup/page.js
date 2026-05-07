@@ -19,7 +19,7 @@ export default function SignupPage() {
     // Supabase requires an email, so we generate a dummy one from the username
     // Using .com instead of .local to pass default Supabase email validation
     const sanitizedUsername = username.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-    const dummyEmail = `${sanitizedUsername}.seeker@maketh-vision.com`;
+    const dummyEmail = `${sanitizedUsername}.mv@gmail.com`;
 
     try {
       const { data, error: signupError } = await supabase.auth.signUp({
@@ -45,10 +45,9 @@ export default function SignupPage() {
       router.push('/?message=Welcome to the Sanctuary!');
       router.refresh();
     } catch (err) {
-      // Hide internal email from error messages
       let msg = err.message;
-      if (msg.includes('@maketh-vision.com')) {
-        msg = msg.replace(/[a-z0-9.]+@maketh-vision\.com/gi, 'username');
+      if (msg.toLowerCase().includes('email')) {
+        msg = "This username is already taken or invalid. Please choose another seeker identity.";
       }
       setError(msg);
     } finally {
