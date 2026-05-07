@@ -19,7 +19,7 @@ export default function SignupPage() {
     // Supabase requires an email, so we generate a dummy one from the username
     // Using .com instead of .local to pass default Supabase email validation
     const sanitizedUsername = username.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-    const dummyEmail = `${sanitizedUsername}.mv@gmail.com`;
+    const dummyEmail = `${sanitizedUsername}@sanctuary.vision`;
 
     try {
       const { data, error: signupError } = await supabase.auth.signUp({

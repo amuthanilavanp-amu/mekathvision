@@ -19,7 +19,7 @@ function LoginContent() {
     setError(null);
 
     const sanitizedUsername = username.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-    const dummyEmail = `${sanitizedUsername}.mv@gmail.com`;
+    const dummyEmail = `${sanitizedUsername}@sanctuary.vision`;
 
     try {
       const { data, error: loginError } = await supabase.auth.signInWithPassword({
