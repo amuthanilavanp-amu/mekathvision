@@ -16,7 +16,7 @@ const INITIAL_CATEGORIES = [
   { id: '6', name: 'Future Visions', slug: 'future', icon: '🔮' }
 ];
 
-export default function ExplorePageContent() {
+function ExplorePageContent() {
   const [categories, setCategories] = useState(INITIAL_CATEGORIES);
   const [stories, setStories] = useState([]);
   const [loading, setLoading] = useState(true);
