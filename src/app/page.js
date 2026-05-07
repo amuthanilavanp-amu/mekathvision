@@ -52,12 +52,15 @@ export default function Home() {
         <div className="category-grid">
           {categories.map((cat) => (
             <Link href={`/explore?category=${cat.slug}`} key={cat.id} style={{ textDecoration: 'none' }}>
-              <div className="category-card">
+              <div className="category-card" style={{ transition: 'transform 0.3s ease' }}>
                 <div className="category-icon">{cat.icon}</div>
-                <h3 className="serif" style={{ fontSize: '1.5rem', color: 'var(--color-text)' }}>{cat.name}</h3>
-                <p style={{ color: 'var(--color-text-dim)', fontSize: '0.85rem', marginTop: '10px' }}>
+                <h3 className="serif" style={{ fontSize: '1.5rem', color: 'var(--color-text)', marginBottom: '10px' }}>{cat.name}</h3>
+                <p style={{ color: 'var(--color-text-dim)', fontSize: '0.85rem', marginBottom: '20px' }}>
                   Explore tales of {cat.name.toLowerCase()}
                 </p>
+                <div className="pill-btn primary" style={{ fontSize: '0.7rem', padding: '8px 20px', display: 'inline-block' }}>
+                  Read Realm Tales
+                </div>
               </div>
             </Link>
           ))}
