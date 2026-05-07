@@ -11,6 +11,10 @@ export default function Navbar() {
 
   useEffect(() => {
     async function getSession() {
+      // 1. Instant UI from Cache
+      const cachedProfile = localStorage.getItem('mv_profile');
+      if (cachedProfile) setProfile(JSON.parse(cachedProfile));
+
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
       
@@ -20,7 +24,11 @@ export default function Navbar() {
           .select('username, avatar_url')
           .eq('id', session.user.id)
           .single();
-        setProfile(profileData);
+        
+        if (profileData) {
+          setProfile(profileData);
+          localStorage.setItem('mv_profile', JSON.stringify(profileData));
+        }
       }
     }
 
@@ -34,9 +42,14 @@ export default function Navbar() {
           .select('username, avatar_url')
           .eq('id', session.user.id)
           .single();
-        setProfile(profileData);
+        
+        if (profileData) {
+          setProfile(profileData);
+          localStorage.setItem('mv_profile', JSON.stringify(profileData));
+        }
       } else {
         setProfile(null);
+        localStorage.removeItem('mv_profile');
       }
     });
 
