@@ -45,7 +45,12 @@ export default function SignupPage() {
       router.push('/?message=Welcome to the Sanctuary!');
       router.refresh();
     } catch (err) {
-      setError(err.message);
+      // Hide internal email from error messages
+      let msg = err.message;
+      if (msg.includes('@maketh-vision.com')) {
+        msg = msg.replace(/[a-z0-9.]+@maketh-vision\.com/gi, 'username');
+      }
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -75,7 +80,7 @@ export default function SignupPage() {
 
         <form onSubmit={handleSignup}>
           <div className="form-group">
-            <label htmlFor="username">Choose Username</label>
+            <label htmlFor="username">Create Username</label>
             <input 
               type="text" 
               id="username" 
@@ -87,7 +92,7 @@ export default function SignupPage() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Set Password</label>
+            <label htmlFor="password">Create Password</label>
             <input 
               type="password" 
               id="password" 

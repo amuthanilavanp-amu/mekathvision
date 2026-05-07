@@ -32,7 +32,12 @@ function LoginContent() {
       router.push('/');
       router.refresh();
     } catch (err) {
-      setError(err.message === 'Invalid login credentials' ? 'Incorrect username or password.' : err.message);
+      // Hide internal email from error messages
+      let msg = err.message;
+      if (msg.includes('@maketh-vision.com')) {
+        msg = msg.replace(/[a-z0-9.]+@maketh-vision\.com/gi, 'username');
+      }
+      setError(msg === 'Invalid login credentials' ? 'Incorrect username or password.' : msg);
     } finally {
       setLoading(false);
     }
