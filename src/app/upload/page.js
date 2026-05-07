@@ -18,20 +18,36 @@ export default function UploadPage() {
 
   useEffect(() => {
     async function fetchData() {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      
-      const { data: catData } = await supabase.from('categories').select('*');
-      setCategories(catData || []);
+      // 1. Check cache first for instant UI
+      const cachedCats = localStorage.getItem('mv_categories');
+      if (cachedCats) setCategories(JSON.parse(cachedCats));
 
-      if (user) {
-        const { count } = await supabase
-          .from('stories')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', user.id);
-        setStoryCount(count || 0);
+      try {
+        const [userRes, catRes] = await Promise.all([
+          supabase.auth.getUser(),
+          supabase.from('categories').select('*')
+        ]);
+
+        const currentUser = userRes.data.user;
+        setUser(currentUser);
+        
+        if (catRes.data) {
+          setCategories(catRes.data);
+          localStorage.setItem('mv_categories', JSON.stringify(catRes.data));
+        }
+
+        if (currentUser) {
+          const { count } = await supabase
+            .from('stories')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', currentUser.id);
+          setStoryCount(count || 0);
+        }
+      } catch (err) {
+        console.error("Manifesting error:", err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     fetchData();
   }, []);
