@@ -78,14 +78,14 @@ CREATE POLICY "Categories are viewable by everyone"
 
 -- Seed categories
 INSERT INTO public.categories (name, slug, icon, color) VALUES
-  ('Fantasy', 'fantasy', '🐉', '#8B5CF6'),
-  ('Horror', 'horror', '👻', '#EF4444'),
-  ('Love', 'love', '❤️', '#EC4899'),
-  ('Motivation', 'motivation', '🔥', '#F59E0B'),
-  ('Adventure', 'adventure', '⚔️', '#10B981'),
-  ('Sci-Fi', 'sci-fi', '🚀', '#3B82F6'),
-  ('Kids', 'kids', '🧸', '#F97316'),
-  ('Mystery', 'mystery', '🔍', '#6366F1')
+  ('Fantasy', 'fantasy', '🏰', '#8B5CF6'),
+  ('Horror', 'horror', '💀', '#EF4444'),
+  ('Love', 'love', '💖', '#EC4899'),
+  ('Motivation', 'motivation', '✨', '#F59E0B'),
+  ('Adventure', 'adventure', '🧭', '#10B981'),
+  ('Sci-Fi', 'sci-fi', '🪐', '#3B82F6'),
+  ('Kids', 'kids', '🎈', '#F97316'),
+  ('Mystery', 'mystery', '👁️', '#6366F1')
 ON CONFLICT (slug) DO NOTHING;
 
 -- ============================================

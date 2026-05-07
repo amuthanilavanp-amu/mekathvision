@@ -1,11 +1,14 @@
 'use client';
 import Link from 'next/link';
+import Navbar from '@/components/Navbar';
 
 export default function AboutPage() {
   return (
-    <main style={{ minHeight: '100vh', background: 'var(--color-bg)', padding: '120px 5%' }}>
-      <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
-        <h1 className="serif" style={{ fontSize: '3.5rem', marginBottom: '30px' }}>About Maketh Vision</h1>
+    <main style={{ minHeight: '100vh', background: 'var(--color-bg)' }}>
+      <Navbar />
+      
+      <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center', padding: '140px 5% 80px' }}>
+        <h1 className="serif" style={{ fontSize: 'clamp(2.5rem, 6vw, 3.5rem)', marginBottom: '30px' }}>About Maketh Vision</h1>
         <p style={{ color: 'var(--color-text-dim)', fontSize: '1.2rem', marginBottom: '50px' }}>
           Crafted by <strong>Joshua Amuthanilavan</strong>, Maketh Vision is a sanctuary for storytellers to manifest their visions into a cinematic experience.
         </p>
@@ -28,3 +31,4 @@ export default function AboutPage() {
     </main>
   );
 }
+
