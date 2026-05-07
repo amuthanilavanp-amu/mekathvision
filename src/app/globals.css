@@ -369,8 +369,50 @@ h1, h2, h3, .serif {
   animation: fadeIn 1.2s ease-out;
 }
 
+/* Responsive Adjustments */
 @media (max-width: 768px) {
-  .nav-links { display: none; }
-  .login-card { padding: 40px 25px; }
+  .navbar {
+    padding: 15px 5%;
+  }
+
+  .nav-logo-text {
+    display: none; /* Hide brand name on small phones to save space */
+  }
+
+  .nav-actions {
+    gap: 5px;
+  }
+
+  .login-card {
+    padding: 40px 20px;
+    width: 95%;
+    max-width: none;
+    border-radius: 24px;
+  }
+
+  .hero-title {
+    font-size: 2.8rem !important;
+  }
+
+  .hero-description {
+    font-size: 1rem !important;
+    padding: 0 5%;
+  }
+
+  .category-grid {
+    grid-template-columns: 1fr !important;
+    gap: 15px;
+    padding: 0 5%;
+  }
+
+  .nav-links {
+    display: none;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .login-card {
+    max-width: 85%;
+  }
 }
 

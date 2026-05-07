@@ -19,7 +19,7 @@ export default function SignupPage() {
     // Supabase requires an email, so we generate a dummy one from the username
     // Using .com instead of .local to pass default Supabase email validation
     const sanitizedUsername = username.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-    const dummyEmail = `${sanitizedUsername}@makethvision.com`;
+    const dummyEmail = `${sanitizedUsername}.seeker@maketh-vision.com`;
 
     try {
       const { data, error: signupError } = await supabase.auth.signUp({
@@ -56,11 +56,14 @@ export default function SignupPage() {
       <div className="login-card">
         <div style={{ marginBottom: '40px' }}>
           <span className="creator-tag">Visionary: Joshua Amuthanilavan</span>
-          <Link href="/" className="nav-logo-group" style={{ justifyContent: 'center' }}>
+          <div className="nav-logo-group" style={{ justifyContent: 'center', gap: '15px' }}>
             <img src="/assets/logo_text.png" alt="Logo" className="nav-logo-icon" style={{ width: '60px', height: '60px' }} />
-            <span className="nav-logo serif">Maketh Vision</span>
-          </Link>
-          <h2 className="serif" style={{ marginTop: '30px', fontSize: '2.2rem' }}>Begin Your Journey</h2>
+            <div className="nav-logo-text" style={{ display: 'block', textAlign: 'left' }}>
+              <span className="nav-logo serif" style={{ fontSize: '2rem' }}>Maketh Vision</span>
+              <span className="creator-credit" style={{ fontSize: '0.7rem' }}>By Joshua Amuthanilavan</span>
+            </div>
+          </div>
+          <h2 className="serif" style={{ marginTop: '30px', fontSize: '2rem' }}>Begin Your Journey</h2>
           <p style={{ color: 'var(--color-text-dim)' }}>Manifest your seeker identity in the chronicles</p>
         </div>
 
