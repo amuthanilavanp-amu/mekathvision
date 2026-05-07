@@ -64,9 +64,6 @@ export default function Home() {
 
       {/* Quote Section */}
       <section className="section" style={{ textAlign: 'center', background: 'rgba(255,255,255,0.02)', padding: '120px 5%' }}>
-
-      {/* Quote Section */}
-      <section className="section" style={{ textAlign: 'center', background: 'rgba(255,255,255,0.02)' }}>
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           <h2 className="section-title serif" style={{ fontSize: '3rem', marginBottom: '40px', textAlign: 'center', border: 'none' }}>
             "Every story is a vision waiting to be told."
