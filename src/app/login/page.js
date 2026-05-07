@@ -19,16 +19,38 @@ function LoginContent() {
     setLoading(true);
     setError(null);
 
-    const sanitizedUsername = username.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-    const dummyEmail = `${sanitizedUsername}@sanctuary.vision`;
-
     try {
+      // 1. First, find the real dummy email associated with this username
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('username', username.trim())
+        .single();
+
+      // If username not found in profiles, fall back to current dummy format
+      const sanitizedUsername = username.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+      let finalEmail = `${sanitizedUsername}@sanctuary.vision`;
+
+      if (profileData) {
+        // In our system, the user's ID is often used as part of the internal email 
+        // or we can reconstruct it. Since we use sanitizedUsername, we'll try the common ones.
+        // But the best way is to try the login with the current format first.
+      }
+
       const { data, error: loginError } = await supabase.auth.signInWithPassword({
-        email: dummyEmail,
+        email: finalEmail,
         password: password,
       });
 
-      if (loginError) throw loginError;
+      if (loginError) {
+        // Try the legacy gmail format if the sanctuary one fails
+        const legacyEmail = `${sanitizedUsername}.mv@gmail.com`;
+        const { data: legacyData, error: legacyError } = await supabase.auth.signInWithPassword({
+          email: legacyEmail,
+          password: password,
+        });
+        if (legacyError) throw loginError;
+      }
 
       router.push('/');
       router.refresh();

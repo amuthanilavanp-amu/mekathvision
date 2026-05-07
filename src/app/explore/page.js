@@ -20,6 +20,7 @@ function ExplorePageContent() {
   const [categories, setCategories] = useState(INITIAL_CATEGORIES);
   const [stories, setStories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
   const searchParams = useSearchParams();
   const selectedCategory = searchParams.get('category');
 
@@ -46,20 +47,47 @@ function ExplorePageContent() {
     ? categories.filter(c => c.slug === selectedCategory)
     : categories;
 
+  const getFilteredStories = (catId) => {
+    return stories.filter(s => {
+      const matchesCategory = s.category_id === catId;
+      const matchesSearch = s.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                           s.description.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCategory && matchesSearch;
+    });
+  };
+
   return (
     <main style={{ minHeight: '100vh', background: 'var(--color-bg)' }}>
       <Navbar />
       
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '140px 5% 80px' }}>
-        <header style={{ marginBottom: '60px' }}>
-          <h1 className="serif" style={{ fontSize: 'clamp(2.5rem, 6vw, 4rem)', marginBottom: '15px' }}>The Sanctuary Library</h1>
-          <p style={{ color: 'var(--color-text-dim)', fontSize: '1.1rem' }}>
-            Discover tales manifested from the depths of imagination.
-          </p>
+        <header style={{ marginBottom: '60px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '30px' }}>
+          <div style={{ flex: '1', minWidth: '300px' }}>
+            <h1 className="serif" style={{ fontSize: 'clamp(2.5rem, 6vw, 4rem)', marginBottom: '15px' }}>The Sanctuary Library</h1>
+            <p style={{ color: 'var(--color-text-dim)', fontSize: '1.1rem' }}>
+              Discover tales manifested from the depths of imagination.
+            </p>
+          </div>
+          
+          <div style={{ flex: '0 1 400px', width: '100%' }}>
+            <div className="password-input-wrapper" style={{ background: 'var(--color-glass)', borderRadius: '100px', padding: '2px 10px', border: '1px solid var(--glass-border)' }}>
+              <span style={{ paddingLeft: '15px', opacity: 0.5 }}>🔍</span>
+              <input 
+                type="text" 
+                placeholder="Search the chronicles..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{ background: 'transparent', border: 'none', padding: '15px', width: '100%', color: 'white' }}
+              />
+            </div>
+          </div>
         </header>
 
         {filteredCategories.map((cat) => {
-          const catStories = stories.filter(s => s.category_id === cat.id);
+          const catStories = getFilteredStories(cat.id);
+          // If we are searching and this category has no matches, hide the category header too
+          if (searchQuery && catStories.length === 0) return null;
+          
           return (
             <section key={cat.id} style={{ marginBottom: '80px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '30px', borderBottom: '1px solid var(--glass-border)', paddingBottom: '15px' }}>
