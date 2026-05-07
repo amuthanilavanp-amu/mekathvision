@@ -40,41 +40,30 @@ export default function Home() {
         <div className="hero-content">
           <h1 className="hero-title serif">The Storying</h1>
           <p className="hero-description">
-            Experience storytelling like never before. Dive into a world of imagination, where every tale is a cinematic journey crafted with passion and vision.
+            Experience storytelling like never before. Dive into a world of imagination, where every tale is a cinematic journey.
           </p>
+          
+          {/* Quick Access Realms (Buttons moved to top) */}
+          <div className="category-scroll-container" style={{ margin: '40px 0', padding: '0 5%' }}>
+            <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', flexWrap: 'wrap' }}>
+              {categories.map((cat) => (
+                <Link href={`/explore?category=${cat.slug}`} key={cat.id} className="pill-btn primary" style={{ fontSize: '0.8rem', padding: '12px 25px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span>{cat.icon}</span>
+                  <span>{cat.name}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+
           <div style={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
-            <Link href="/explore" className="hero-cta">Explore Stories</Link>
-            <Link href="/upload" className="hero-cta secondary">
-              Share Your Tale
-            </Link>
+            <Link href="/explore" className="hero-cta">Explore Library</Link>
+            <Link href="/upload" className="hero-cta secondary">Manifest Tale</Link>
           </div>
         </div>
       </section>
 
-      {/* Category Section (View Point) */}
-      <section className="category-section">
-        <header style={{ textAlign: 'center', marginBottom: '60px' }}>
-          <h2 className="serif" style={{ fontSize: '3rem', color: 'var(--color-primary)' }}>View Point</h2>
-          <p style={{ color: 'var(--color-text-dim)' }}>Browse the realms of imagination by genre</p>
-        </header>
-
-        <div className="category-grid">
-          {categories.map((cat) => (
-            <Link href={`/explore?category=${cat.slug}`} key={cat.id} style={{ textDecoration: 'none' }}>
-              <div className="category-card" style={{ transition: 'transform 0.3s ease' }}>
-                <div className="category-icon">{cat.icon}</div>
-                <h3 className="serif" style={{ fontSize: '1.5rem', color: 'var(--color-text)', marginBottom: '10px' }}>{cat.name}</h3>
-                <p style={{ color: 'var(--color-text-dim)', fontSize: '0.85rem', marginBottom: '20px' }}>
-                  Explore tales of {cat.name.toLowerCase()}
-                </p>
-                <div className="pill-btn primary" style={{ fontSize: '0.7rem', padding: '8px 20px', display: 'inline-block' }}>
-                  Read Realm Tales
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
+      {/* Quote Section */}
+      <section className="section" style={{ textAlign: 'center', background: 'rgba(255,255,255,0.02)', padding: '120px 5%' }}>
 
       {/* Quote Section */}
       <section className="section" style={{ textAlign: 'center', background: 'rgba(255,255,255,0.02)' }}>
