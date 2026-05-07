@@ -4,13 +4,22 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import { supabase } from '@/lib/supabase';
 
+const INITIAL_CATEGORIES = [
+  { id: '1', name: 'Epic Fantasy', slug: 'fantasy', icon: '🧙‍♂️' },
+  { id: '2', name: 'Sci-Fi Odyssey', slug: 'sci-fi', icon: '🚀' },
+  { id: '3', name: 'Dark Mystery', slug: 'mystery', icon: '🕵️' },
+  { id: '4', name: 'Eternal Romance', slug: 'romance', icon: '❤️' },
+  { id: '5', name: 'Ancient Lore', slug: 'history', icon: '📜' },
+  { id: '6', name: 'Future Visions', slug: 'future', icon: '🔮' }
+];
+
 export default function Home() {
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState(INITIAL_CATEGORIES);
 
   useEffect(() => {
     async function fetchCategories() {
       const { data } = await supabase.from('categories').select('*');
-      setCategories(data || []);
+      if (data && data.length > 0) setCategories(data);
     }
     fetchCategories();
   }, []);

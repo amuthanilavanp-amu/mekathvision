@@ -7,8 +7,17 @@ import { supabase } from '@/lib/supabase';
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
-function ExploreContent() {
-  const [categories, setCategories] = useState([]);
+const INITIAL_CATEGORIES = [
+  { id: '1', name: 'Epic Fantasy', slug: 'fantasy', icon: '🧙‍♂️' },
+  { id: '2', name: 'Sci-Fi Odyssey', slug: 'sci-fi', icon: '🚀' },
+  { id: '3', name: 'Dark Mystery', slug: 'mystery', icon: '🕵️' },
+  { id: '4', name: 'Eternal Romance', slug: 'romance', icon: '❤️' },
+  { id: '5', name: 'Ancient Lore', slug: 'history', icon: '📜' },
+  { id: '6', name: 'Future Visions', slug: 'future', icon: '🔮' }
+];
+
+export default function ExplorePageContent() {
+  const [categories, setCategories] = useState(INITIAL_CATEGORIES);
   const [stories, setStories] = useState([]);
   const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
@@ -16,20 +25,13 @@ function ExploreContent() {
 
   useEffect(() => {
     async function fetchData() {
-      // Instant cache load
-      const cachedCats = localStorage.getItem('mv_categories');
-      if (cachedCats) setCategories(JSON.parse(cachedCats));
-
       try {
         const [catRes, storyRes] = await Promise.all([
           supabase.from('categories').select('*'),
           supabase.from('stories').select('*, profiles(username)').order('created_at', { ascending: false })
         ]);
 
-        if (catRes.data) {
-          setCategories(catRes.data);
-          localStorage.setItem('mv_categories', JSON.stringify(catRes.data));
-        }
+        if (catRes.data && catRes.data.length > 0) setCategories(catRes.data);
         if (storyRes.data) setStories(storyRes.data);
       } catch (err) {
         console.error("Library error:", err);
@@ -43,12 +45,6 @@ function ExploreContent() {
   const filteredCategories = selectedCategory 
     ? categories.filter(c => c.slug === selectedCategory)
     : categories;
-
-  if (loading && categories.length === 0) return (
-    <div className="login-container">
-      <div className="serif" style={{ fontSize: '2rem' }}>Opening the Archive...</div>
-    </div>
-  );
 
   return (
     <main style={{ minHeight: '100vh', background: 'var(--color-bg)' }}>
@@ -114,7 +110,7 @@ function ExploreContent() {
 export default function ExplorePage() {
   return (
     <Suspense fallback={<div>Loading Library...</div>}>
-      <ExploreContent />
+      <ExplorePageContent />
     </Suspense>
   );
 }

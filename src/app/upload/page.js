@@ -4,9 +4,18 @@ import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 
+const INITIAL_CATEGORIES = [
+  { id: '1', name: 'Epic Fantasy', slug: 'fantasy', icon: '🧙‍♂️' },
+  { id: '2', name: 'Sci-Fi Odyssey', slug: 'sci-fi', icon: '🚀' },
+  { id: '3', name: 'Dark Mystery', slug: 'mystery', icon: '🕵️' },
+  { id: '4', name: 'Eternal Romance', slug: 'romance', icon: '❤️' },
+  { id: '5', name: 'Ancient Lore', slug: 'history', icon: '📜' },
+  { id: '6', name: 'Future Visions', slug: 'future', icon: '🔮' }
+];
+
 export default function UploadPage() {
   const [user, setUser] = useState(null);
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState(INITIAL_CATEGORIES);
   const [loading, setLoading] = useState(true);
   const [storyCount, setStoryCount] = useState(0);
   const [uploading, setUploading] = useState(false);
@@ -18,10 +27,6 @@ export default function UploadPage() {
 
   useEffect(() => {
     async function fetchData() {
-      // 1. Check cache first for instant UI
-      const cachedCats = localStorage.getItem('mv_categories');
-      if (cachedCats) setCategories(JSON.parse(cachedCats));
-
       try {
         const [userRes, catRes] = await Promise.all([
           supabase.auth.getUser(),
@@ -31,10 +36,7 @@ export default function UploadPage() {
         const currentUser = userRes.data.user;
         setUser(currentUser);
         
-        if (catRes.data) {
-          setCategories(catRes.data);
-          localStorage.setItem('mv_categories', JSON.stringify(catRes.data));
-        }
+        if (catRes.data && catRes.data.length > 0) setCategories(catRes.data);
 
         if (currentUser) {
           const { count } = await supabase
@@ -66,11 +68,6 @@ export default function UploadPage() {
     }, 2000);
   };
 
-  if (loading) return (
-    <div className="login-container">
-      <div className="serif" style={{ fontSize: '2rem' }}>Loading Vision...</div>
-    </div>
-  );
 
   return (
     <main style={{ minHeight: '100vh', background: 'var(--color-bg)' }}>
