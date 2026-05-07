@@ -4,23 +4,34 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import { supabase } from '@/lib/supabase';
 
-export default function ExplorePage() {
+import { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+
+function ExploreContent() {
   const [categories, setCategories] = useState([]);
   const [stories, setStories] = useState([]);
+  const searchParams = useSearchParams();
+  const selectedCategory = searchParams.get('category');
 
   useEffect(() => {
     async function fetchData() {
       const { data: catData } = await supabase.from('categories').select('*');
       setCategories(catData || []);
 
-      const { data: storyData } = await supabase
+      let query = supabase
         .from('stories')
         .select('*, profiles(username)')
         .order('created_at', { ascending: false });
+      
+      const { data: storyData } = await query;
       setStories(storyData || []);
     }
     fetchData();
   }, []);
+
+  const filteredCategories = selectedCategory 
+    ? categories.filter(c => c.slug === selectedCategory)
+    : categories;
 
   return (
     <main style={{ minHeight: '100vh', background: 'var(--color-bg)' }}>
@@ -34,7 +45,7 @@ export default function ExplorePage() {
           </p>
         </header>
 
-        {categories.map((cat) => {
+        {filteredCategories.map((cat) => {
           const catStories = stories.filter(s => s.category_id === cat.id);
           return (
             <section key={cat.id} style={{ marginBottom: '80px' }}>
@@ -80,6 +91,14 @@ export default function ExplorePage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function ExplorePage() {
+  return (
+    <Suspense fallback={<div>Loading Library...</div>}>
+      <ExploreContent />
+    </Suspense>
   );
 }
 
