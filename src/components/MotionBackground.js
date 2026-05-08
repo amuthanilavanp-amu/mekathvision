@@ -41,9 +41,15 @@ export default function MotionBackground() {
         
         const img = imagesRef.current[frameIndexRef.current];
         if (img && ctx) {
-          // Responsive canvas sizing
-          canvas.width = window.innerWidth;
-          canvas.height = window.innerHeight;
+          const dpr = window.devicePixelRatio || 1;
+          
+          // Set display size (css pixels)
+          canvas.style.width = window.innerWidth + 'px';
+          canvas.style.height = window.innerHeight + 'px';
+          
+          // Set actual size in memory (scaled by DPR)
+          canvas.width = window.innerWidth * dpr;
+          canvas.height = window.innerHeight * dpr;
           
           // Draw image to fill canvas (cover effect)
           const imgRatio = img.width / img.height;
@@ -63,6 +69,9 @@ export default function MotionBackground() {
           }
 
           ctx.clearRect(0, 0, canvas.width, canvas.height);
+          // Use high quality image smoothing
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
           ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
         }
       }
@@ -94,7 +103,9 @@ export default function MotionBackground() {
           display: block;
           width: 100%;
           height: 100%;
-          filter: contrast(1.1) brightness(0.9); /* Slight boost for cinematic feel */
+          filter: contrast(1.15) brightness(0.85) saturate(1.1);
+          image-rendering: -webkit-optimize-contrast;
+          image-rendering: crisp-edges;
         }
         .motion-vignette {
           position: absolute;

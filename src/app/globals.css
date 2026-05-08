@@ -453,7 +453,7 @@ input:-webkit-autofill:active{
   text-shadow: 0 10px 40px rgba(0,0,0,0.8);
   animation: fadeIn 1.2s ease-out;
   margin-bottom: var(--space-md);
-  margin-top: 15vh; /* Push title down to clear the center of the animation */
+  margin-top: 25vh; /* Pushed significantly down to clear the central motion */
 }
 
 .hero-description {
