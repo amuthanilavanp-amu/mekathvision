@@ -201,7 +201,14 @@ function ExplorePageContent() {
 
 export default function ExplorePage() {
   return (
-    <Suspense fallback={<div>Loading Library...</div>}>
+    <Suspense fallback={
+      <main style={{ minHeight: '100vh', background: 'var(--color-bg)' }}>
+        <Navbar />
+        <div className="login-container" style={{ paddingTop: '140px' }}>
+          <div className="serif" style={{ fontSize: '2rem', animation: 'pulse 2s infinite' }}>Consulting the Chronicles...</div>
+        </div>
+      </main>
+    }>
       <ExplorePageContent />
     </Suspense>
   );

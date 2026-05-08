@@ -12,24 +12,25 @@ export default function ProfilePage() {
 
   useEffect(() => {
     async function fetchData() {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
 
-      if (user) {
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-        setProfile(profileData);
+        if (user) {
+          // Fetch profile and stories in parallel
+          const [profileRes, storyRes] = await Promise.all([
+            supabase.from('profiles').select('*').eq('id', user.id).single(),
+            supabase.from('stories').select('*, categories(name, icon)').eq('user_id', user.id)
+          ]);
 
-        const { data: storyData } = await supabase
-          .from('stories')
-          .select('*, categories(name, icon)')
-          .eq('user_id', user.id);
-        setStories(storyData || []);
+          if (profileRes.data) setProfile(profileRes.data);
+          if (storyRes.data) setStories(storyRes.data);
+        }
+      } catch (err) {
+        console.error("Error fetching chamber data:", err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     fetchData();
   }, []);
@@ -57,9 +58,12 @@ export default function ProfilePage() {
   };
 
   if (loading) return (
-    <div className="login-container">
-      <div className="serif" style={{ fontSize: '2rem' }}>Consulting the Chronicles...</div>
-    </div>
+    <main style={{ minHeight: '100vh', background: 'var(--color-bg)' }}>
+      <Navbar />
+      <div className="login-container" style={{ paddingTop: '140px' }}>
+        <div className="serif" style={{ fontSize: '2rem', animation: 'pulse 2s infinite' }}>Consulting the Chronicles...</div>
+      </div>
+    </main>
   );
 
   if (!user) {
