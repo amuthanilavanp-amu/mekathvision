@@ -450,9 +450,10 @@ input:-webkit-autofill:active{
 }
 
 .hero-title {
-  text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  text-shadow: 0 10px 40px rgba(0,0,0,0.8);
   animation: fadeIn 1.2s ease-out;
   margin-bottom: var(--space-md);
+  margin-top: 15vh; /* Push title down to clear the center of the animation */
 }
 
 .hero-description {
@@ -594,12 +595,13 @@ input:-webkit-autofill:active{
   }
   
   .hero-content {
-    padding-top: 100px;
+    padding-top: 60px; /* Reduced for mobile */
     padding-bottom: 40px;
   }
   
   .hero-title {
     margin-bottom: 15px;
+    margin-top: 0; /* Reset for mobile */
   }
 }
 

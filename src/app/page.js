@@ -53,7 +53,7 @@ export default function Home() {
         <div className="hero-overlay" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(12, 10, 9, 0.98))' }}></div>
         
         <div className="hero-content container">
-          <h1 className="hero-title serif">The Storying Manifested</h1>
+          <h1 className="hero-title serif">The Storying</h1>
           <p className="hero-description">
             Experience storytelling like never before. Dive into a world of imagination, where every tale is a cinematic journey.
           </p>

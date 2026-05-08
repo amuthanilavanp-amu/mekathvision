@@ -1,39 +1,83 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 export default function MotionBackground() {
-  const [currentFrame, setCurrentFrame] = useState(0);
+  const canvasRef = useRef(null);
   const totalFrames = 146;
   const frameRate = 40; // ms
-  const frameRef = useRef(0);
+  const imagesRef = useRef([]);
+  const frameIndexRef = useRef(0);
+  const lastTimeRef = useRef(0);
 
   // Format frame number to 3 digits
   const formatFrame = (num) => num.toString().padStart(3, '0');
 
   useEffect(() => {
-    // Pre-load all frames for smooth motion
-    const loadedImages = [];
-    for (let i = 0; i < totalFrames; i++) {
-      const img = new Image();
-      img.src = `/motion/frame_${formatFrame(i)}_delay-0.04s.jpg`;
-      loadedImages.push(img);
-    }
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    let animationFrameId;
 
-    const interval = setInterval(() => {
-      frameRef.current = (frameRef.current + 1) % totalFrames;
-      setCurrentFrame(frameRef.current);
-    }, frameRate);
+    // Pre-load all frames
+    const loadImages = async () => {
+      const promises = [];
+      for (let i = 0; i < totalFrames; i++) {
+        const img = new Image();
+        img.src = `/motion/frame_${formatFrame(i)}_delay-0.04s.jpg`;
+        promises.push(new Promise((resolve) => {
+          img.onload = () => resolve(img);
+          img.onerror = () => resolve(null);
+        }));
+      }
+      imagesRef.current = await Promise.all(promises);
+      
+      // Start animation loop once enough images are loaded
+      requestAnimationFrame(animate);
+    };
 
-    return () => clearInterval(interval);
+    const animate = (time) => {
+      if (time - lastTimeRef.current >= frameRate) {
+        lastTimeRef.current = time;
+        frameIndexRef.current = (frameIndexRef.current + 1) % totalFrames;
+        
+        const img = imagesRef.current[frameIndexRef.current];
+        if (img && ctx) {
+          // Responsive canvas sizing
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight;
+          
+          // Draw image to fill canvas (cover effect)
+          const imgRatio = img.width / img.height;
+          const canvasRatio = canvas.width / canvas.height;
+          let drawWidth, drawHeight, drawX, drawY;
+
+          if (canvasRatio > imgRatio) {
+            drawWidth = canvas.width;
+            drawHeight = canvas.width / imgRatio;
+            drawX = 0;
+            drawY = (canvas.height - drawHeight) / 2;
+          } else {
+            drawWidth = canvas.height * imgRatio;
+            drawHeight = canvas.height;
+            drawX = (canvas.width - drawWidth) / 2;
+            drawY = 0;
+          }
+
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+        }
+      }
+      animationFrameId = requestAnimationFrame(animate);
+    };
+
+    loadImages();
+
+    return () => cancelAnimationFrame(animationFrameId);
   }, []);
 
   return (
     <div className="motion-bg-container">
-      <img 
-        src={`/motion/frame_${formatFrame(currentFrame)}_delay-0.04s.jpg`}
-        alt="Motion Background"
-        className="motion-bg-frame"
-      />
+      <canvas ref={canvasRef} className="motion-bg-canvas" />
+      <div className="motion-vignette" />
 
       <style jsx>{`
         .motion-bg-container {
@@ -46,10 +90,20 @@ export default function MotionBackground() {
           z-index: -1;
           background: #000;
         }
-        .motion-bg-frame {
+        .motion-bg-canvas {
+          display: block;
           width: 100%;
           height: 100%;
-          object-fit: cover;
+          filter: contrast(1.1) brightness(0.9); /* Slight boost for cinematic feel */
+        }
+        .motion-vignette {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: radial-gradient(circle at center, transparent 30%, rgba(0,0,0,0.4) 100%);
+          pointer-events: none;
         }
       `}</style>
     </div>
