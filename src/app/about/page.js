@@ -7,13 +7,13 @@ export default function AboutPage() {
     <main style={{ minHeight: '100vh', background: 'var(--color-bg)' }}>
       <Navbar />
       
-      <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center', padding: '140px 5% 80px' }}>
-        <h1 className="serif" style={{ fontSize: 'clamp(2.5rem, 6vw, 3.5rem)', marginBottom: '30px' }}>About Maketh Vision</h1>
-        <p style={{ color: 'var(--color-text-dim)', fontSize: '1.2rem', marginBottom: '50px' }}>
+      <div className="container" style={{ textAlign: 'center', padding: '140px 5% 80px' }}>
+        <h1 className="serif" style={{ marginBottom: '30px' }}>About Maketh Vision</h1>
+        <p style={{ color: 'var(--color-text-dim)', marginBottom: '50px', maxWidth: '800px', margin: '0 auto 50px' }}>
           Crafted by <strong>Joshua Amuthanilavan</strong>, Maketh Vision is a sanctuary for storytellers to manifest their visions into a cinematic experience.
         </p>
 
-        <div className="login-card" style={{ maxWidth: '100%', textAlign: 'left' }}>
+        <div className="login-card" style={{ maxWidth: '800px', textAlign: 'left', margin: '0 auto' }}>
           <h2 className="serif" style={{ marginBottom: '20px' }}>The Vision</h2>
           <p style={{ marginBottom: '20px' }}>
             We believe that every story is a vision waiting to be told. Our platform provides a cinematic, immersive environment for readers and writers to connect through the art of storytelling.

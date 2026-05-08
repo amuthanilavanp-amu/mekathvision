@@ -34,6 +34,28 @@ export default function ProfilePage() {
     fetchData();
   }, []);
 
+  const handleDeleteStory = async (storyId) => {
+    if (!window.confirm("Are you sure you want to banish this tale from the chronicles? This action cannot be undone.")) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('stories')
+        .delete()
+        .eq('id', storyId);
+
+      if (error) throw error;
+
+      // Update state to remove the deleted story
+      setStories(stories.filter(s => s.id !== storyId));
+      alert("The tale has been banished.");
+    } catch (err) {
+      console.error("Error banishing tale:", err);
+      alert("Failed to banish the tale. Please consult the scribes.");
+    }
+  };
+
   if (loading) return (
     <div className="login-container">
       <div className="serif" style={{ fontSize: '2rem' }}>Consulting the Chronicles...</div>
@@ -56,13 +78,13 @@ export default function ProfilePage() {
     <main style={{ minHeight: '100vh', background: 'var(--color-bg)' }}>
       <Navbar />
 
-      <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '140px 5% 80px' }}>
-        <section className="login-card" style={{ maxWidth: '100%', textAlign: 'left', display: 'flex', gap: '40px', alignItems: 'center', marginBottom: '60px' }}>
-          <div className="user-avatar" style={{ width: '100px', height: '100px', fontSize: '3rem' }}>
+      <div className="container" style={{ padding: '140px 5% 80px' }}>
+        <section className="login-card profile-header" style={{ maxWidth: '100%', textAlign: 'left', marginBottom: '60px' }}>
+          <div className="user-avatar profile-avatar">
             {profile?.username?.charAt(0) || 'U'}
           </div>
-          <div>
-            <h1 className="serif" style={{ fontSize: '2.5rem', marginBottom: '10px' }}>{profile?.username || 'Seeker'}</h1>
+          <div className="profile-info">
+            <h1 className="serif">{profile?.username || 'Seeker'}</h1>
             <p style={{ color: 'var(--color-text-dim)', marginBottom: '15px' }}>{user.email || 'Mystery Seeker'}</p>
             <div style={{ display: 'flex', gap: '20px' }}>
               <div>
@@ -73,10 +95,10 @@ export default function ProfilePage() {
           </div>
         </section>
 
-        <h2 className="serif" style={{ fontSize: '2rem', marginBottom: '30px' }}>Your Manifested Tales</h2>
+        <h2 className="serif" style={{ marginBottom: '30px' }}>Your Manifested Tales</h2>
         
         {stories.length > 0 ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '30px' }}>
+          <div className="grid-auto">
             {stories.map((story) => (
               <div key={story.id} className="category-card" style={{ textAlign: 'left', padding: '0', overflow: 'hidden' }}>
                 <img src={story.thumbnail_url} alt={story.title} style={{ width: '100%', height: '180px', objectFit: 'cover' }} />
@@ -85,9 +107,15 @@ export default function ProfilePage() {
                     {story.categories?.icon} {story.categories?.name}
                   </div>
                   <h3 className="serif" style={{ marginBottom: '10px' }}>{story.title}</h3>
-                  <div style={{ display: 'flex', gap: '10px' }}>
+                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                     <Link href={story.file_url} className="pill-btn" style={{ fontSize: '0.7rem', padding: '5px 12px' }}>Read</Link>
-                    <button className="pill-btn" style={{ fontSize: '0.7rem', padding: '5px 12px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none', cursor: 'pointer' }}>Delete</button>
+                    <button 
+                      onClick={() => handleDeleteStory(story.id)}
+                      className="pill-btn" 
+                      style={{ fontSize: '0.7rem', padding: '5px 12px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)', cursor: 'pointer' }}
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
               </div>

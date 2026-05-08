@@ -4,13 +4,31 @@ import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 
+import { 
+  FantasyIcon, 
+  SciFiIcon, 
+  MysteryIcon, 
+  RomanceIcon, 
+  HistoryIcon, 
+  FutureIcon 
+} from '@/components/Icons';
+
+const ICON_MAP = {
+  'fantasy': <FantasyIcon />,
+  'sci-fi': <SciFiIcon />,
+  'mystery': <MysteryIcon />,
+  'romance': <RomanceIcon />,
+  'history': <HistoryIcon />,
+  'future': <FutureIcon />
+};
+
 const INITIAL_CATEGORIES = [
-  { id: '1', name: 'Epic Fantasy', slug: 'fantasy', icon: '🧙‍♂️' },
-  { id: '2', name: 'Sci-Fi Odyssey', slug: 'sci-fi', icon: '🚀' },
-  { id: '3', name: 'Dark Mystery', slug: 'mystery', icon: '🕵️' },
-  { id: '4', name: 'Eternal Romance', slug: 'romance', icon: '❤️' },
-  { id: '5', name: 'Ancient Lore', slug: 'history', icon: '📜' },
-  { id: '6', name: 'Future Visions', slug: 'future', icon: '🔮' }
+  { id: '1', name: 'Epic Fantasy', slug: 'fantasy' },
+  { id: '2', name: 'Sci-Fi Odyssey', slug: 'sci-fi' },
+  { id: '3', name: 'Dark Mystery', slug: 'mystery' },
+  { id: '4', name: 'Eternal Romance', slug: 'romance' },
+  { id: '5', name: 'Ancient Lore', slug: 'history' },
+  { id: '6', name: 'Future Visions', slug: 'future' }
 ];
 
 export default function UploadPage() {
@@ -73,9 +91,9 @@ export default function UploadPage() {
     <main style={{ minHeight: '100vh', background: 'var(--color-bg)' }}>
       <Navbar />
 
-      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '140px 5% 80px' }}>
+      <div className="container" style={{ padding: '140px 5% 80px' }}>
         <header style={{ marginBottom: '60px', textAlign: 'center' }}>
-          <h1 className="serif" style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', marginBottom: '15px' }}>Manifest Your Tale</h1>
+          <h1 className="serif">Manifest Your Tale</h1>
           <p style={{ color: 'var(--color-text-dim)' }}>
             Share your imagination. You have {storyCount} of 12 stories manifested.
           </p>
@@ -83,11 +101,11 @@ export default function UploadPage() {
 
         {!user ? (
           <div className="login-card">
-            <h2 className="serif" style={{ fontSize: '2.5rem', marginBottom: '20px' }}>Access Restricted</h2>
-            <p style={{ marginBottom: '40px', color: 'var(--color-text-dim)', fontSize: '1.1rem', lineHeight: '1.8' }}>
+            <h2 className="serif" style={{ marginBottom: '20px' }}>Access Restricted</h2>
+            <p style={{ marginBottom: '40px', color: 'var(--color-text-dim)', lineHeight: '1.8' }}>
               You must be logged in to share your tales with the world. Join the sanctuary of storytellers today.
             </p>
-            <div style={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
+            <div className="hero-cta-group">
               <Link href="/login" className="hero-cta">Sign In</Link>
               <Link href="/signup" className="hero-cta secondary">Sign Up</Link>
             </div>
@@ -114,7 +132,7 @@ export default function UploadPage() {
               >
                 <option value="">Select a Genre</option>
                 {categories.map(cat => (
-                  <option key={cat.id} value={cat.id}>{cat.icon} {cat.name}</option>
+                  <option key={cat.id} value={cat.id}>{cat.name}</option>
                 ))}
               </select>
             </div>
@@ -130,7 +148,7 @@ export default function UploadPage() {
               />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '25px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '25px' }}>
               <div className="form-group">
                 <label>Thumbnail Image (Required)</label>
                 <div style={{ position: 'relative' }}>
@@ -155,11 +173,11 @@ export default function UploadPage() {
               </div>
 
               <div className="form-group">
-                <label>Story Document (PDF/DOC)</label>
+                <label>Story Document (PDF/DOC/PPT)</label>
                 <div style={{ position: 'relative' }}>
                   <input 
                     type="file" 
-                    accept=".pdf,.doc,.docx" 
+                    accept=".pdf,.doc,.docx,.ppt,.pptx" 
                     required 
                     id="story"
                     style={{ opacity: 0, position: 'absolute', inset: 0, cursor: 'pointer', zIndex: 2 }}
@@ -172,7 +190,7 @@ export default function UploadPage() {
                     textAlign: 'center',
                     color: 'var(--color-text-dim)'
                   }}>
-                    📄 Upload Story
+                    📄 Upload Story (PDF, DOC, PPT)
                   </div>
                 </div>
               </div>
@@ -187,22 +205,24 @@ export default function UploadPage() {
         {/* View Point / Categories Section */}
         <section style={{ marginTop: '120px' }}>
           <header style={{ textAlign: 'center', marginBottom: '50px' }}>
-            <h2 className="serif" style={{ fontSize: '2.5rem', color: 'var(--color-primary)' }}>The Realms of Vision</h2>
+            <h2 className="serif" style={{ color: 'var(--color-primary)' }}>The Realms of Vision</h2>
             <p style={{ color: 'var(--color-text-dim)' }}>Explore the categories available for your manifestations</p>
           </header>
           
-          <div className="category-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px' }}>
+          <div className="grid-auto">
             {categories.map((cat) => (
-              <div key={cat.id} className="category-card" style={{ padding: '20px' }}>
-                <div style={{ fontSize: '2rem', marginBottom: '10px' }}>{cat.icon}</div>
-                <h3 className="serif" style={{ fontSize: '1.2rem' }}>{cat.name}</h3>
+              <div key={cat.id} className="category-card" style={{ padding: '25px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <div style={{ color: 'var(--color-primary)', marginBottom: '15px', display: 'flex' }}>
+                  {ICON_MAP[cat.slug] || '✨'}
+                </div>
+                <h3 className="serif" style={{ fontSize: '1.1rem', margin: 0 }}>{cat.name}</h3>
               </div>
             ))}
           </div>
         </section>
 
         <div style={{ marginTop: '40px', textAlign: 'center' }}>
-          <Link href="/" style={{ color: 'var(--color-text-dim)', textDecoration: 'none', fontSize: '0.9rem' }}>
+          <Link href="/" className="nav-link" style={{ fontSize: '0.9rem' }}>
             ← Back to Sanctuary
           </Link>
         </div>

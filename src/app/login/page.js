@@ -54,16 +54,25 @@ function LoginContent() {
   return (
     <div className="login-card">
       <div style={{ marginBottom: '40px' }}>
-        <span className="creator-tag">Visionary: Joshua Amuthanilavan</span>
-        <div className="nav-logo-group" style={{ justifyContent: 'center', gap: '15px' }}>
-          <img src="/assets/logo_text.png" alt="Logo" className="nav-logo-icon" style={{ width: '60px', height: '60px' }} />
-          <div className="nav-logo-text" style={{ display: 'block', textAlign: 'left' }}>
-            <span className="nav-logo serif" style={{ fontSize: '2rem' }}>Maketh Vision</span>
-            <span className="creator-credit" style={{ fontSize: '0.7rem' }}>By Joshua Amuthanilavan</span>
+        <div className="flex-center" style={{ marginBottom: '20px' }}>
+          <span className="creator-tag">Visionary: Joshua Amuthanilavan</span>
+        </div>
+        
+        <div className="flex-center" style={{ gap: '20px', marginBottom: '30px' }}>
+          <img 
+            src="/assets/logo_text.png" 
+            alt="Maketh Vision Logo" 
+            className="nav-logo-icon" 
+            style={{ width: '70px', height: '70px', border: '2px solid rgba(226, 177, 122, 0.4)' }} 
+          />
+          <div style={{ textAlign: 'left' }}>
+            <h1 className="serif" style={{ fontSize: '2.2rem', color: 'var(--color-primary)', margin: 0 }}>Maketh Vision</h1>
+            <p className="creator-credit" style={{ margin: 0, opacity: 0.6 }}>By Joshua Amuthanilavan</p>
           </div>
         </div>
-        <h2 className="serif" style={{ marginTop: '30px', fontSize: '2rem' }}>Welcome Back</h2>
-        <p style={{ color: 'var(--color-text-dim)' }}>Step back into the sanctuary of stories</p>
+
+        <h2 className="serif" style={{ fontSize: '1.8rem', letterSpacing: '1px' }}>Welcome Back</h2>
+        <p style={{ color: 'var(--color-text-dim)', fontSize: '0.95rem' }}>Step back into the sanctuary of stories</p>
       </div>
 
       {message && (
