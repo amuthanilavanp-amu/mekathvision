@@ -18,7 +18,6 @@ export default function SignupPage() {
     setError(null);
 
     // Supabase requires an email, so we generate a dummy one from the username
-    // Using .com instead of .local to pass default Supabase email validation
     const sanitizedUsername = username.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
     const dummyEmail = `${sanitizedUsername}@sanctuary.vision`;
 
@@ -35,20 +34,27 @@ export default function SignupPage() {
 
       if (signupError) throw signupError;
 
-      // Log in immediately after signup
+      // If user is already created but not confirmed (or just created), try to log in
       const { error: loginError } = await supabase.auth.signInWithPassword({
         email: dummyEmail,
         password: password,
       });
 
-      if (loginError) throw loginError;
+      if (loginError) {
+        if (loginError.message.includes('Email not confirmed')) {
+          throw new Error("Account created! However, email confirmation is required by the sanctuary. Please check your scrolls (or consult the visionary).");
+        }
+        throw loginError;
+      }
 
       router.push('/?message=Welcome to the Sanctuary!');
       router.refresh();
     } catch (err) {
       let msg = err.message;
-      if (msg.toLowerCase().includes('email')) {
-        msg = "This username is already taken or invalid. Please choose another seeker identity.";
+      if (msg.toLowerCase().includes('already registered')) {
+        msg = "This identity is already manifested in the chronicles. Try logging in instead.";
+      } else if (msg.toLowerCase().includes('email')) {
+        msg = "This username is invalid or requires confirmation. Please choose another seeker identity.";
       }
       setError(msg);
     } finally {

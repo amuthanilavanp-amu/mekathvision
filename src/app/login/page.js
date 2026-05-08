@@ -20,32 +20,38 @@ function LoginContent() {
     setError(null);
 
     try {
-      const sanitizedUsername = username.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-      const primaryEmail = `${sanitizedUsername}@sanctuary.vision`;
+      let loginEmail = username.trim();
+      
+      // If it's not already an email, format it as a sanctuary vision email
+      if (!loginEmail.includes('@')) {
+        const sanitized = loginEmail.toLowerCase().replace(/[^a-z0-9]/g, '');
+        loginEmail = `${sanitized}@sanctuary.vision`;
+      }
 
       const { data, error: loginError } = await supabase.auth.signInWithPassword({
-        email: primaryEmail,
+        email: loginEmail,
         password: password,
       });
 
       if (loginError) {
-        // Fallback to legacy gmail format if first attempt fails
-        const legacyEmail = `${sanitizedUsername}.mv@gmail.com`;
-        const { error: legacyError } = await supabase.auth.signInWithPassword({
-          email: legacyEmail,
-          password: password,
-        });
-        if (legacyError) throw loginError;
+        // Fallback to legacy gmail format or try raw input if first attempt fails
+        if (!username.includes('@')) {
+          const sanitizedUsername = username.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+          const legacyEmail = `${sanitizedUsername}.mv@gmail.com`;
+          const { error: legacyError } = await supabase.auth.signInWithPassword({
+            email: legacyEmail,
+            password: password,
+          });
+          if (legacyError) throw loginError;
+        } else {
+          throw loginError;
+        }
       }
 
       router.push('/');
       router.refresh();
     } catch (err) {
-      let msg = err.message;
-      if (msg.toLowerCase().includes('email')) {
-        msg = "Incorrect username or password.";
-      }
-      setError(msg === 'Invalid login credentials' ? 'Incorrect username or password.' : msg);
+      setError(err.message === 'Invalid login credentials' ? 'Incorrect username or password.' : err.message);
     } finally {
       setLoading(false);
     }

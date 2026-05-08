@@ -23,12 +23,12 @@ const ICON_MAP = {
 };
 
 const INITIAL_CATEGORIES = [
-  { id: '1', name: 'Epic Fantasy', slug: 'fantasy' },
-  { id: '2', name: 'Sci-Fi Odyssey', slug: 'sci-fi' },
-  { id: '3', name: 'Dark Mystery', slug: 'mystery' },
-  { id: '4', name: 'Eternal Romance', slug: 'romance' },
-  { id: '5', name: 'Ancient Lore', slug: 'history' },
-  { id: '6', name: 'Future Visions', slug: 'future' }
+  { id: 1, name: 'Epic Fantasy', slug: 'fantasy' },
+  { id: 2, name: 'Sci-Fi Odyssey', slug: 'sci-fi' },
+  { id: 3, name: 'Dark Mystery', slug: 'mystery' },
+  { id: 4, name: 'Eternal Romance', slug: 'romance' },
+  { id: 5, name: 'Ancient Lore', slug: 'history' },
+  { id: 6, name: 'Future Visions', slug: 'future' }
 ];
 
 export default function UploadPage() {
@@ -37,11 +37,14 @@ export default function UploadPage() {
   const [loading, setLoading] = useState(true);
   const [storyCount, setStoryCount] = useState(0);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [formData, setFormData] = useState({
     title: '',
     category_id: '',
     description: ''
   });
+  const [thumbnailFile, setThumbnailFile] = useState(null);
+  const [storyFile, setStoryFile] = useState(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -72,18 +75,85 @@ export default function UploadPage() {
     fetchData();
   }, []);
 
+  const handleFileChange = (e, type) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (type === 'thumbnail') setThumbnailFile(file);
+      else setStoryFile(file);
+    }
+  };
+
+  const uploadFile = async (file, bucket) => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+    const filePath = `${user.id}/${fileName}`;
+
+    const { error: uploadError, data } = await supabase.storage
+      .from(bucket)
+      .upload(filePath, file);
+
+    if (uploadError) throw uploadError;
+
+    const { data: { publicUrl } } = supabase.storage
+      .from(bucket)
+      .getPublicUrl(filePath);
+
+    return publicUrl;
+  };
+
   const handleUpload = async (e) => {
     e.preventDefault();
     if (!user) return alert('Please login first');
     if (storyCount >= 12) return alert('You have reached the maximum limit of 12 stories.');
+    if (!thumbnailFile || !storyFile) return alert('Please select both a thumbnail and a story file.');
 
     setUploading(true);
-    // In a real app, we would upload to storage here. 
-    // For this demo, we'll just show the feedback.
-    setTimeout(() => {
+    setUploadProgress(10);
+
+    try {
+      // 1. Upload Thumbnail
+      setUploadProgress(30);
+      const thumbnailUrl = await uploadFile(thumbnailFile, 'thumbnails');
+      
+      // 2. Upload Story File
+      setUploadProgress(60);
+      const storyUrl = await uploadFile(storyFile, 'stories');
+
+      // 3. Save to Database
+      setUploadProgress(80);
+      const fileExt = storyFile.name.split('.').pop().toLowerCase();
+      const { error: dbError } = await supabase
+        .from('stories')
+        .insert([{
+          user_id: user.id,
+          title: formData.title,
+          category_id: formData.category_id,
+          description: formData.description,
+          thumbnail_url: thumbnailUrl,
+          file_url: storyUrl,
+          file_type: fileExt,
+          file_name: storyFile.name,
+          file_size: storyFile.size
+        }]);
+
+      if (dbError) throw dbError;
+
+      setUploadProgress(100);
+      alert('Your vision has been manifested in the chronicles!');
+      
+      // Reset form
+      setFormData({ title: '', category_id: '', description: '' });
+      setThumbnailFile(null);
+      setStoryFile(null);
+      setStoryCount(prev => prev + 1);
+      
+    } catch (err) {
+      console.error("Upload error:", err);
+      alert(`Manifestation failed: ${err.message || 'Unknown error'}`);
+    } finally {
       setUploading(false);
-      alert('Your vision has been manifested! (Storage upload would happen here in production)');
-    }, 2000);
+      setUploadProgress(0);
+    }
   };
 
 
@@ -112,6 +182,12 @@ export default function UploadPage() {
           </div>
         ) : (
           <form onSubmit={handleUpload} className="login-card" style={{ maxWidth: '100%', textAlign: 'left' }}>
+            {uploading && (
+              <div style={{ marginBottom: '20px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', height: '8px', overflow: 'hidden' }}>
+                <div style={{ height: '100%', background: 'var(--color-primary)', width: `${uploadProgress}%`, transition: 'width 0.3s ease' }}></div>
+              </div>
+            )}
+
             <div className="form-group">
               <label>Story Title</label>
               <input 
@@ -142,6 +218,7 @@ export default function UploadPage() {
               <textarea 
                 placeholder="Briefly describe the vision behind this tale..."
                 rows="4"
+                required
                 value={formData.description}
                 onChange={e => setFormData({...formData, description: e.target.value})}
                 style={{ resize: 'none' }}
@@ -157,17 +234,19 @@ export default function UploadPage() {
                     accept="image/*" 
                     required 
                     id="thumb"
+                    onChange={(e) => handleFileChange(e, 'thumbnail')}
                     style={{ opacity: 0, position: 'absolute', inset: 0, cursor: 'pointer', zIndex: 2 }}
                   />
                   <div style={{ 
-                    background: 'rgba(255,255,255,0.03)', 
-                    border: '2px dashed var(--glass-border)', 
+                    background: thumbnailFile ? 'rgba(212, 163, 115, 0.1)' : 'rgba(255,255,255,0.03)', 
+                    border: thumbnailFile ? '2px solid var(--color-primary)' : '2px dashed var(--glass-border)', 
                     borderRadius: '12px', 
                     padding: '30px', 
                     textAlign: 'center',
-                    color: 'var(--color-text-dim)'
+                    color: thumbnailFile ? 'var(--color-primary)' : 'var(--color-text-dim)',
+                    transition: 'all 0.3s ease'
                   }}>
-                    📸 Select Thumbnail
+                    {thumbnailFile ? `✅ ${thumbnailFile.name}` : '📸 Select Thumbnail'}
                   </div>
                 </div>
               </div>
@@ -180,24 +259,26 @@ export default function UploadPage() {
                     accept=".pdf,.doc,.docx,.ppt,.pptx" 
                     required 
                     id="story"
+                    onChange={(e) => handleFileChange(e, 'story')}
                     style={{ opacity: 0, position: 'absolute', inset: 0, cursor: 'pointer', zIndex: 2 }}
                   />
                   <div style={{ 
-                    background: 'rgba(255,255,255,0.03)', 
-                    border: '2px dashed var(--glass-border)', 
+                    background: storyFile ? 'rgba(212, 163, 115, 0.1)' : 'rgba(255,255,255,0.03)', 
+                    border: storyFile ? '2px solid var(--color-primary)' : '2px dashed var(--glass-border)', 
                     borderRadius: '12px', 
                     padding: '30px', 
                     textAlign: 'center',
-                    color: 'var(--color-text-dim)'
+                    color: storyFile ? 'var(--color-primary)' : 'var(--color-text-dim)',
+                    transition: 'all 0.3s ease'
                   }}>
-                    📄 Upload Story (PDF, DOC, PPT)
+                    {storyFile ? `✅ ${storyFile.name}` : '📄 Upload Story (PDF, DOC, PPT)'}
                   </div>
                 </div>
               </div>
             </div>
 
             <button type="submit" className="login-btn" disabled={uploading}>
-              {uploading ? 'Manifesting...' : 'Manifest Story'}
+              {uploading ? `Manifesting (${uploadProgress}%)...` : 'Manifest Story'}
             </button>
           </form>
         )}
