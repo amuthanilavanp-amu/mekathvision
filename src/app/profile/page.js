@@ -108,7 +108,15 @@ export default function ProfilePage() {
                   </div>
                   <h3 className="serif" style={{ marginBottom: '10px' }}>{story.title}</h3>
                   <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                    <Link href={story.file_url} className="pill-btn" style={{ fontSize: '0.7rem', padding: '5px 12px' }}>Read</Link>
+                    <a 
+                      href={`https://docs.google.com/viewer?url=${encodeURIComponent(story.file_url)}&embedded=true`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="pill-btn" 
+                      style={{ fontSize: '0.7rem', padding: '5px 12px' }}
+                    >
+                      Read
+                    </a>
                     <button 
                       onClick={() => handleDeleteStory(story.id)}
                       className="pill-btn" 

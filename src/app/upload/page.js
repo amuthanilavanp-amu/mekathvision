@@ -83,14 +83,66 @@ export default function UploadPage() {
     }
   };
 
-  const uploadFile = async (file, bucket) => {
+  const compressImage = (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 1200;
+          const MAX_HEIGHT = 800;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          canvas.toBlob((blob) => {
+            const compressedFile = new File([blob], file.name, {
+              type: 'image/jpeg',
+              lastModified: Date.now(),
+            });
+            resolve(compressedFile);
+          }, 'image/jpeg', 0.8);
+        };
+      };
+    });
+  };
+
+  const uploadFile = async (file, bucket, onProgress) => {
     const fileExt = file.name.split('.').pop();
     const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
     const filePath = `${user.id}/${fileName}`;
 
-    const { error: uploadError, data } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from(bucket)
-      .upload(filePath, file);
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false,
+        onUploadProgress: (progress) => {
+          if (onProgress && progress.totalBytes) {
+            const percent = (progress.bytesTransferred / progress.totalBytes) * 100;
+            onProgress(percent);
+          }
+        }
+      });
 
     if (uploadError) throw uploadError;
 
@@ -107,27 +159,52 @@ export default function UploadPage() {
     if (storyCount >= 12) return alert('You have reached the maximum limit of 12 stories.');
     if (!thumbnailFile || !storyFile) return alert('Please select both a thumbnail and a story file.');
 
+    // 10MB limit check
+    const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+    if (storyFile.size > MAX_SIZE) {
+      return alert('Story document is too large. Maximum size allowed is 10MB.');
+    }
+
     setUploading(true);
-    setUploadProgress(10);
+    setUploadProgress(0);
+
+    let thumbProgress = 0;
+    let storyProgress = 0;
+
+    const updateCombinedProgress = () => {
+      const totalUploadProgress = (thumbProgress + storyProgress) / 2;
+      setUploadProgress(Math.round(totalUploadProgress * 0.9));
+    };
 
     try {
-      // 1. Upload Thumbnail
-      setUploadProgress(30);
-      const thumbnailUrl = await uploadFile(thumbnailFile, 'thumbnails');
-      
-      // 2. Upload Story File
-      setUploadProgress(60);
-      const storyUrl = await uploadFile(storyFile, 'stories');
+      // 1. Compress Thumbnail if it's an image
+      let finalThumbFile = thumbnailFile;
+      if (thumbnailFile.type.startsWith('image/')) {
+        setUploadProgress(2);
+        finalThumbFile = await compressImage(thumbnailFile);
+      }
 
-      // 3. Save to Database
-      setUploadProgress(80);
+      // 2 & 3. Upload Thumbnail and Story File in parallel
+      const [thumbnailUrl, storyUrl] = await Promise.all([
+        uploadFile(finalThumbFile, 'thumbnails', (p) => {
+          thumbProgress = p;
+          updateCombinedProgress();
+        }),
+        uploadFile(storyFile, 'stories', (p) => {
+          storyProgress = p;
+          updateCombinedProgress();
+        })
+      ]);
+
+      // 4. Save to Database
+      setUploadProgress(95);
       const fileExt = storyFile.name.split('.').pop().toLowerCase();
       const { error: dbError } = await supabase
         .from('stories')
         .insert([{
           user_id: user.id,
           title: formData.title,
-          category_id: formData.category_id,
+          category_id: parseInt(formData.category_id),
           description: formData.description,
           thumbnail_url: thumbnailUrl,
           file_url: storyUrl,
@@ -139,18 +216,19 @@ export default function UploadPage() {
       if (dbError) throw dbError;
 
       setUploadProgress(100);
-      alert('Your vision has been manifested in the chronicles!');
-      
-      // Reset form
-      setFormData({ title: '', category_id: '', description: '' });
-      setThumbnailFile(null);
-      setStoryFile(null);
-      setStoryCount(prev => prev + 1);
+      setTimeout(() => {
+        alert('Your vision has been manifested in the chronicles!');
+        setFormData({ title: '', category_id: '', description: '' });
+        setThumbnailFile(null);
+        setStoryFile(null);
+        setStoryCount(prev => prev + 1);
+        setUploading(false);
+        setUploadProgress(0);
+      }, 500);
       
     } catch (err) {
       console.error("Upload error:", err);
       alert(`Manifestation failed: ${err.message || 'Unknown error'}`);
-    } finally {
       setUploading(false);
       setUploadProgress(0);
     }
@@ -183,8 +261,19 @@ export default function UploadPage() {
         ) : (
           <form onSubmit={handleUpload} className="login-card" style={{ maxWidth: '100%', textAlign: 'left' }}>
             {uploading && (
-              <div style={{ marginBottom: '20px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', height: '8px', overflow: 'hidden' }}>
-                <div style={{ height: '100%', background: 'var(--color-primary)', width: `${uploadProgress}%`, transition: 'width 0.3s ease' }}></div>
+              <div style={{ marginBottom: '30px', animation: 'fadeIn 0.5s ease-out' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '0.85rem' }}>
+                  <span style={{ color: 'var(--color-primary)', fontWeight: '600' }}>
+                    {uploadProgress < 10 ? 'Preparing Vision...' : 
+                     uploadProgress < 40 ? 'Analyzing Imagery...' :
+                     uploadProgress < 80 ? 'Manifesting Chronicles...' :
+                     uploadProgress < 95 ? 'Sealing the Tale...' : 'Finalizing...'}
+                  </span>
+                  <span style={{ color: 'var(--color-text-dim)' }}>{uploadProgress}%</span>
+                </div>
+                <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '100px', height: '6px', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
+                  <div style={{ height: '100%', background: 'linear-gradient(90deg, var(--color-primary), #fbbf24)', width: `${uploadProgress}%`, transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}></div>
+                </div>
               </div>
             )}
 
@@ -205,8 +294,9 @@ export default function UploadPage() {
                 required 
                 value={formData.category_id} 
                 onChange={e => setFormData({...formData, category_id: e.target.value})}
+                className="category-select"
               >
-                <option value="">Select a Genre</option>
+                <option value="">Select a Realm</option>
                 {categories.map(cat => (
                   <option key={cat.id} value={cat.id}>{cat.name}</option>
                 ))}

@@ -166,7 +166,15 @@ function ExplorePageContent() {
                                 Delete
                               </button>
                             )}
-                            <Link href={story.file_url} className="pill-btn" style={{ fontSize: '0.7rem', padding: '6px 15px' }}>Read Tale</Link>
+                            <a 
+                              href={`https://docs.google.com/viewer?url=${encodeURIComponent(story.file_url)}&embedded=true`} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="pill-btn" 
+                              style={{ fontSize: '0.7rem', padding: '6px 15px' }}
+                            >
+                              Read Tale
+                            </a>
                           </div>
                         </div>
                       </div>
