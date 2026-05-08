@@ -1,15 +1,15 @@
 'use client';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export default function MotionBackground() {
   const canvasRef = useRef(null);
-  const totalFrames = 146;
+  const totalFrames = 192; // Updated to actual frame count
   const frameRate = 40; // ms
   const imagesRef = useRef([]);
   const frameIndexRef = useRef(0);
   const lastTimeRef = useRef(0);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  // Format frame number to 3 digits
   const formatFrame = (num) => num.toString().padStart(3, '0');
 
   useEffect(() => {
@@ -17,41 +17,39 @@ export default function MotionBackground() {
     const ctx = canvas.getContext('2d');
     let animationFrameId;
 
-    // Pre-load all frames
     const loadImages = async () => {
       const promises = [];
       for (let i = 0; i < totalFrames; i++) {
         const img = new Image();
-        img.src = `/motion/frame_${formatFrame(i)}_delay-0.04s.jpg`;
+        img.src = `/motion/frame_${formatFrame(i)}.jpg`; // Consistent filename
         promises.push(new Promise((resolve) => {
           img.onload = () => resolve(img);
           img.onerror = () => resolve(null);
         }));
       }
-      imagesRef.current = await Promise.all(promises);
+      const loaded = await Promise.all(promises);
+      imagesRef.current = loaded.filter(img => img !== null);
       
-      // Start animation loop once enough images are loaded
-      requestAnimationFrame(animate);
+      if (imagesRef.current.length > 0) {
+        setIsLoaded(true);
+        requestAnimationFrame(animate);
+      }
     };
 
     const animate = (time) => {
       if (time - lastTimeRef.current >= frameRate) {
         lastTimeRef.current = time;
-        frameIndexRef.current = (frameIndexRef.current + 1) % totalFrames;
+        frameIndexRef.current = (frameIndexRef.current + 1) % imagesRef.current.length;
         
         const img = imagesRef.current[frameIndexRef.current];
         if (img && ctx) {
           const dpr = window.devicePixelRatio || 1;
           
-          // Set display size (css pixels)
           canvas.style.width = window.innerWidth + 'px';
           canvas.style.height = window.innerHeight + 'px';
-          
-          // Set actual size in memory (scaled by DPR)
           canvas.width = window.innerWidth * dpr;
           canvas.height = window.innerHeight * dpr;
           
-          // Draw image to fill canvas (cover effect)
           const imgRatio = img.width / img.height;
           const canvasRatio = canvas.width / canvas.height;
           let drawWidth, drawHeight, drawX, drawY;
@@ -69,9 +67,8 @@ export default function MotionBackground() {
           }
 
           ctx.clearRect(0, 0, canvas.width, canvas.height);
-          // Use high quality image smoothing
-          ctx.imageSmoothingEnabled = true;
-          ctx.imageSmoothingQuality = 'high';
+          // High-performance sharpen
+          ctx.imageSmoothingEnabled = false; // Crisp for JPGs
           ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
         }
       }
@@ -85,7 +82,18 @@ export default function MotionBackground() {
 
   return (
     <div className="motion-bg-container">
-      <canvas ref={canvasRef} className="motion-bg-canvas" />
+      {/* Placeholder image until canvas is ready */}
+      {!isLoaded && (
+        <img 
+          src="/assets/hero_background_1778049679282.png" 
+          alt="Loading..." 
+          className="motion-placeholder"
+        />
+      )}
+      <canvas 
+        ref={canvasRef} 
+        className={`motion-bg-canvas ${isLoaded ? 'visible' : ''}`} 
+      />
       <div className="motion-vignette" />
 
       <style jsx>{`
@@ -99,13 +107,25 @@ export default function MotionBackground() {
           z-index: -1;
           background: #000;
         }
+        .motion-placeholder {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          opacity: 0.5;
+        }
         .motion-bg-canvas {
           display: block;
           width: 100%;
           height: 100%;
-          filter: contrast(1.15) brightness(0.85) saturate(1.1);
+          opacity: 0;
+          transition: opacity 1.5s ease-in-out;
+          filter: contrast(1.2) brightness(0.85) saturate(1.2) drop-shadow(0 0 10px rgba(0,0,0,0.5));
+          image-rendering: pixelated; /* Forces sharpness on high-res displays */
           image-rendering: -webkit-optimize-contrast;
-          image-rendering: crisp-edges;
+          transform: translateZ(0); /* Hardware acceleration */
+        }
+        .motion-bg-canvas.visible {
+          opacity: 1;
         }
         .motion-vignette {
           position: absolute;
