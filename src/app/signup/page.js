@@ -26,15 +26,15 @@ export default function SignupPage() {
     try {
       console.log("Attempting manifestation for:", { username, dummyEmail });
 
-      // 1. Check if username is already taken in the profiles table
-      const { data: existingProfile, error: checkError } = await supabase
+      // 1. Check if username is already taken
+      const { data: existingProfile } = await supabase
         .from('profiles')
         .select('username')
         .eq('username', username)
         .maybeSingle();
 
       if (existingProfile) {
-        throw new Error("This seeker identity is already claimed in the chronicles. Please choose another.");
+        throw new Error("This seeker identity is already claimed in the chronicles.");
       }
 
       // 2. Perform the Signup
@@ -42,43 +42,39 @@ export default function SignupPage() {
         email: dummyEmail,
         password: password,
         options: {
-          data: {
-            username: username
-          }
+          data: { username: username }
         }
       });
 
-      if (signupError) {
-        console.error("Signup failure details:", signupError);
-        throw signupError;
-      }
+      if (signupError) throw signupError;
 
-      // 3. Log them in immediately
-      const { error: loginError } = await supabase.auth.signInWithPassword({
+      // 3. Immediate Login
+      const { data: authData, error: loginError } = await supabase.auth.signInWithPassword({
         email: dummyEmail,
         password: password,
       });
 
-      if (loginError) {
-        if (loginError.message.includes('Email not confirmed')) {
-          throw new Error("Account manifested! However, email confirmation is required. Please check your scrolls.");
-        }
-        throw loginError;
+      if (loginError) throw loginError;
+
+      // 4. "Auto-Repair": If the trigger failed, try to create the profile manually now
+      // This works because the user is now authenticated
+      if (authData?.user) {
+        await supabase.from('profiles').insert([
+          { id: authData.user.id, username: username, email: dummyEmail }
+        ]).select().single().catch(e => console.warn("Profile already exists or trigger worked."));
       }
 
       router.push('/?message=Welcome to the Sanctuary!');
       router.refresh();
     } catch (err) {
-      console.error("Manifestation caught error:", err);
+      console.error("Signup error detail:", err);
       let msg = err.message;
       const lowerMsg = msg.toLowerCase();
       
-      if (lowerMsg.includes('already registered') || lowerMsg.includes('already manifested') || lowerMsg.includes('already exists')) {
-        msg = "This identity or email is already manifested. Try a different name or logging in.";
-      } else if (lowerMsg.includes('email')) {
-        msg = "This identity requires validation or the email format is invalid. Please try another seeker name.";
+      if (lowerMsg.includes('already registered') || lowerMsg.includes('already exists')) {
+        msg = "This identity is already manifested. Try logging in!";
       } else if (lowerMsg.includes('database error') || lowerMsg.includes('saving new user')) {
-        msg = "The sanctuary encountered a database ripple. This usually means the username is taken but not showing in the index. Try a slightly different name.";
+        msg = "The sanctuary is experiencing a heavy ripple. Please try once more with a slightly different name, or wait a moment.";
       }
       setError(msg);
     } finally {
