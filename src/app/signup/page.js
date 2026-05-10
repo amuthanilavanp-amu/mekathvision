@@ -22,6 +22,18 @@ export default function SignupPage() {
     const dummyEmail = `${sanitizedUsername}@sanctuary.vision`;
 
     try {
+      // 1. Check if username is already taken in the profiles table
+      const { data: existingProfile, error: checkError } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('username', username)
+        .maybeSingle();
+
+      if (existingProfile) {
+        throw new Error("This seeker identity is already claimed in the chronicles. Please choose another.");
+      }
+
+      // 2. Perform the Signup
       const { data, error: signupError } = await supabase.auth.signUp({
         email: dummyEmail,
         password: password,
@@ -34,7 +46,7 @@ export default function SignupPage() {
 
       if (signupError) throw signupError;
 
-      // If user is already created but not confirmed (or just created), try to log in
+      // 3. Log them in immediately
       const { error: loginError } = await supabase.auth.signInWithPassword({
         email: dummyEmail,
         password: password,
@@ -42,7 +54,7 @@ export default function SignupPage() {
 
       if (loginError) {
         if (loginError.message.includes('Email not confirmed')) {
-          throw new Error("Account created! However, email confirmation is required by the sanctuary. Please check your scrolls (or consult the visionary).");
+          throw new Error("Account manifested! However, email confirmation is required. Please check your scrolls.");
         }
         throw loginError;
       }
@@ -51,10 +63,14 @@ export default function SignupPage() {
       router.refresh();
     } catch (err) {
       let msg = err.message;
-      if (msg.toLowerCase().includes('already registered')) {
-        msg = "This identity is already manifested in the chronicles. Try logging in instead.";
-      } else if (msg.toLowerCase().includes('email')) {
-        msg = "This username is invalid or requires confirmation. Please choose another seeker identity.";
+      const lowerMsg = msg.toLowerCase();
+      
+      if (lowerMsg.includes('already registered') || lowerMsg.includes('already manifested')) {
+        msg = "This identity is already manifested. Try logging in instead.";
+      } else if (lowerMsg.includes('email')) {
+        msg = "This identity requires validation or is invalid. Please try another seeker name.";
+      } else if (lowerMsg.includes('database error') || lowerMsg.includes('saving new user')) {
+        msg = "The sanctuary encountered a database ripple while saving your profile. Please try a slightly different username.";
       }
       setError(msg);
     } finally {

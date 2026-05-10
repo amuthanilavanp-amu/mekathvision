@@ -14,7 +14,7 @@ export const metadata = {
   openGraph: {
     title: 'Maketh Vision',
     description: 'The sanctuary for cinematic storytelling.',
-    url: 'https://lambent-druid-d71534.netlify.app',
+    url: 'https://timely-concha-3d7463.netlify.app',
     siteName: 'Maketh Vision',
     images: [
       {

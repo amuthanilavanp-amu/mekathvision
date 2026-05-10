@@ -15,20 +15,24 @@ import {
 
 const ICON_MAP = {
   'fantasy': <FantasyIcon />,
+  'horror': <MysteryIcon />,
+  'love': <RomanceIcon />,
+  'motivation': <FutureIcon />,
+  'adventure': <HistoryIcon />,
   'sci-fi': <SciFiIcon />,
-  'mystery': <MysteryIcon />,
-  'romance': <RomanceIcon />,
-  'history': <HistoryIcon />,
-  'future': <FutureIcon />
+  'kids': <FantasyIcon />,
+  'mystery': <MysteryIcon />
 };
 
 const INITIAL_CATEGORIES = [
-  { id: 1, name: 'Epic Fantasy', slug: 'fantasy' },
-  { id: 2, name: 'Sci-Fi Odyssey', slug: 'sci-fi' },
-  { id: 3, name: 'Dark Mystery', slug: 'mystery' },
-  { id: 4, name: 'Eternal Romance', slug: 'romance' },
-  { id: 5, name: 'Ancient Lore', slug: 'history' },
-  { id: 6, name: 'Future Visions', slug: 'future' }
+  { id: '1', name: 'Fantasy', slug: 'fantasy' },
+  { id: '2', name: 'Horror', slug: 'horror' },
+  { id: '3', name: 'Love', slug: 'love' },
+  { id: '4', name: 'Motivation', slug: 'motivation' },
+  { id: '5', name: 'Adventure', slug: 'adventure' },
+  { id: '6', name: 'Sci-Fi', slug: 'sci-fi' },
+  { id: '7', name: 'Kids', slug: 'kids' },
+  { id: '8', name: 'Mystery', slug: 'mystery' }
 ];
 
 export default function UploadPage() {
@@ -131,31 +135,44 @@ export default function UploadPage() {
     const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
     const filePath = `${user.id}/${fileName}`;
 
+    console.log(`Uploading ${file.name} to ${bucket}...`);
+
     const { error: uploadError } = await supabase.storage
       .from(bucket)
       .upload(filePath, file, {
         cacheControl: '3600',
         upsert: false,
         onUploadProgress: (progress) => {
-          if (onProgress && progress.totalBytes) {
-            const percent = (progress.bytesTransferred / progress.totalBytes) * 100;
+          if (onProgress && progress.total) {
+            const percent = (progress.loaded / progress.total) * 100;
             onProgress(percent);
           }
         }
       });
 
-    if (uploadError) throw uploadError;
+    if (uploadError) {
+      console.error(`Storage error (${bucket}):`, uploadError);
+      throw new Error(`Storage error in bucket "${bucket}": ${uploadError.message}`);
+    }
 
-    const { data: { publicUrl } } = supabase.storage
+    const { data } = supabase.storage
       .from(bucket)
       .getPublicUrl(filePath);
 
-    return publicUrl;
+    if (!data || !data.publicUrl) {
+      throw new Error(`Failed to get public URL for ${fileName} in ${bucket}`);
+    }
+
+    return data.publicUrl;
   };
 
   const handleUpload = async (e) => {
     e.preventDefault();
     if (!user) return alert('Please login first');
+    
+    // Check if category is selected
+    if (!formData.category_id) return alert('Please select a realm (category).');
+
     if (storyCount >= 12) return alert('You have reached the maximum limit of 12 stories.');
     if (!thumbnailFile || !storyFile) return alert('Please select both a thumbnail and a story file.');
 
@@ -177,11 +194,26 @@ export default function UploadPage() {
     };
 
     try {
+      // 0. Ensure user profile exists (foreign key constraint)
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .single();
+      
+      if (profileError || !profile) {
+        throw new Error("Your profile could not be found. Please try logging out and back in.");
+      }
+
       // 1. Compress Thumbnail if it's an image
       let finalThumbFile = thumbnailFile;
       if (thumbnailFile.type.startsWith('image/')) {
         setUploadProgress(2);
-        finalThumbFile = await compressImage(thumbnailFile);
+        try {
+          finalThumbFile = await compressImage(thumbnailFile);
+        } catch (compErr) {
+          console.warn("Compression failed, using original:", compErr);
+        }
       }
 
       // 2 & 3. Upload Thumbnail and Story File in parallel
@@ -199,12 +231,18 @@ export default function UploadPage() {
       // 4. Save to Database
       setUploadProgress(95);
       const fileExt = storyFile.name.split('.').pop().toLowerCase();
+      const catId = parseInt(formData.category_id);
+      
+      if (isNaN(catId)) {
+        throw new Error("Invalid category selected.");
+      }
+
       const { error: dbError } = await supabase
         .from('stories')
         .insert([{
           user_id: user.id,
           title: formData.title,
-          category_id: parseInt(formData.category_id),
+          category_id: catId,
           description: formData.description,
           thumbnail_url: thumbnailUrl,
           file_url: storyUrl,
@@ -213,7 +251,10 @@ export default function UploadPage() {
           file_size: storyFile.size
         }]);
 
-      if (dbError) throw dbError;
+      if (dbError) {
+        console.error("Database insert error:", dbError);
+        throw new Error(`Database error: ${dbError.message}`);
+      }
 
       setUploadProgress(100);
       setTimeout(() => {
@@ -227,8 +268,8 @@ export default function UploadPage() {
       }, 500);
       
     } catch (err) {
-      console.error("Upload error:", err);
-      alert(`Manifestation failed: ${err.message || 'Unknown error'}`);
+      console.error("Upload process failed:", err);
+      alert(`Manifestation failed: ${err.message || 'Unknown error'}\n\nHint: Check if the "stories" and "thumbnails" buckets exist in Supabase Storage.`);
       setUploading(false);
       setUploadProgress(0);
     }

@@ -18,20 +18,24 @@ import {
 
 const ICON_MAP = {
   'fantasy': <FantasyIcon />,
+  'horror': <MysteryIcon />,
+  'love': <RomanceIcon />,
+  'motivation': <FutureIcon />,
+  'adventure': <HistoryIcon />,
   'sci-fi': <SciFiIcon />,
-  'mystery': <MysteryIcon />,
-  'romance': <RomanceIcon />,
-  'history': <HistoryIcon />,
-  'future': <FutureIcon />
+  'kids': <FantasyIcon />,
+  'mystery': <MysteryIcon />
 };
 
 const INITIAL_CATEGORIES = [
-  { id: '1', name: 'Epic Fantasy', slug: 'fantasy' },
-  { id: '2', name: 'Sci-Fi Odyssey', slug: 'sci-fi' },
-  { id: '3', name: 'Dark Mystery', slug: 'mystery' },
-  { id: '4', name: 'Eternal Romance', slug: 'romance' },
-  { id: '5', name: 'Ancient Lore', slug: 'history' },
-  { id: '6', name: 'Future Visions', slug: 'future' }
+  { id: '1', name: 'Fantasy', slug: 'fantasy' },
+  { id: '2', name: 'Horror', slug: 'horror' },
+  { id: '3', name: 'Love', slug: 'love' },
+  { id: '4', name: 'Motivation', slug: 'motivation' },
+  { id: '5', name: 'Adventure', slug: 'adventure' },
+  { id: '6', name: 'Sci-Fi', slug: 'sci-fi' },
+  { id: '7', name: 'Kids', slug: 'kids' },
+  { id: '8', name: 'Mystery', slug: 'mystery' }
 ];
 
 function ExplorePageContent() {
@@ -47,15 +51,19 @@ function ExplorePageContent() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [userRes, catRes, storyRes] = await Promise.all([
-          supabase.auth.getUser(),
+        // 1. Fetch Public Data (Categories and Stories)
+        const [catRes, storyRes] = await Promise.all([
           supabase.from('categories').select('*'),
           supabase.from('stories').select('*, profiles(username)').order('created_at', { ascending: false })
         ]);
 
-        if (userRes.data?.user) setUser(userRes.data.user);
-        if (catRes.data && catRes.data.length > 0) setCategories(catRes.data);
+        if (catRes.data) setCategories(catRes.data);
         if (storyRes.data) setStories(storyRes.data);
+
+        // 2. Separately check for user session (don't block data if this fails)
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) setUser(session.user);
+
       } catch (err) {
         console.error("Library error:", err);
       } finally {

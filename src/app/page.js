@@ -16,20 +16,24 @@ import MotionBackground from '@/components/MotionBackground';
 
 const ICON_MAP = {
   'fantasy': <FantasyIcon />,
+  'horror': <MysteryIcon />,
+  'love': <RomanceIcon />,
+  'motivation': <FutureIcon />,
+  'adventure': <HistoryIcon />,
   'sci-fi': <SciFiIcon />,
-  'mystery': <MysteryIcon />,
-  'romance': <RomanceIcon />,
-  'history': <HistoryIcon />,
-  'future': <FutureIcon />
+  'kids': <FantasyIcon />,
+  'mystery': <MysteryIcon />
 };
 
 const INITIAL_CATEGORIES = [
-  { id: '1', name: 'Epic Fantasy', slug: 'fantasy' },
-  { id: '2', name: 'Sci-Fi Odyssey', slug: 'sci-fi' },
-  { id: '3', name: 'Dark Mystery', slug: 'mystery' },
-  { id: '4', name: 'Eternal Romance', slug: 'romance' },
-  { id: '5', name: 'Ancient Lore', slug: 'history' },
-  { id: '6', name: 'Future Visions', slug: 'future' }
+  { id: '1', name: 'Fantasy', slug: 'fantasy' },
+  { id: '2', name: 'Horror', slug: 'horror' },
+  { id: '3', name: 'Love', slug: 'love' },
+  { id: '4', name: 'Motivation', slug: 'motivation' },
+  { id: '5', name: 'Adventure', slug: 'adventure' },
+  { id: '6', name: 'Sci-Fi', slug: 'sci-fi' },
+  { id: '7', name: 'Kids', slug: 'kids' },
+  { id: '8', name: 'Mystery', slug: 'mystery' }
 ];
 
 export default function Home() {

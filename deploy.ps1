@@ -32,6 +32,6 @@ git commit -m "Maketh Vision v2.0 - Production Build [Automated]"
 Write-Host "☁️ Pushing to GitHub..."
 git push -u origin main --force
 
-Write-Host "`n✅ Done! Check your Netlify dashboard at https://app.netlify.com/projects/lambent-druid-d71534/deploys" -ForegroundColor Green
-Write-Host "The site will be live at: https://lambent-druid-d71534.netlify.app" -ForegroundColor Cyan
+Write-Host "`n✅ Done! Check your Netlify dashboard at https://app.netlify.com/projects/timely-concha-3d7463/deploys" -ForegroundColor Green
+Write-Host "The site will be live at: https://timely-concha-3d7463.netlify.app" -ForegroundColor Cyan
 pause
