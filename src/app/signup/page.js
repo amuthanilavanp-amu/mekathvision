@@ -18,10 +18,14 @@ export default function SignupPage() {
     setError(null);
 
     // Supabase requires an email, so we generate a dummy one from the username
-    const sanitizedUsername = username.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-    const dummyEmail = `${sanitizedUsername}@sanctuary.vision`;
+    // Supabase requires an email, so we generate a unique one from the username
+    // We now allow dots, underscores, and dashes to prevent collisions between similar usernames
+    const sanitizedEmailPart = username.trim().toLowerCase().replace(/[^a-z0-9._-]/g, '');
+    const dummyEmail = `${sanitizedEmailPart}@sanctuary.vision`;
 
     try {
+      console.log("Attempting manifestation for:", { username, dummyEmail });
+
       // 1. Check if username is already taken in the profiles table
       const { data: existingProfile, error: checkError } = await supabase
         .from('profiles')
@@ -44,7 +48,10 @@ export default function SignupPage() {
         }
       });
 
-      if (signupError) throw signupError;
+      if (signupError) {
+        console.error("Signup failure details:", signupError);
+        throw signupError;
+      }
 
       // 3. Log them in immediately
       const { error: loginError } = await supabase.auth.signInWithPassword({
@@ -62,15 +69,16 @@ export default function SignupPage() {
       router.push('/?message=Welcome to the Sanctuary!');
       router.refresh();
     } catch (err) {
+      console.error("Manifestation caught error:", err);
       let msg = err.message;
       const lowerMsg = msg.toLowerCase();
       
-      if (lowerMsg.includes('already registered') || lowerMsg.includes('already manifested')) {
-        msg = "This identity is already manifested. Try logging in instead.";
+      if (lowerMsg.includes('already registered') || lowerMsg.includes('already manifested') || lowerMsg.includes('already exists')) {
+        msg = "This identity or email is already manifested. Try a different name or logging in.";
       } else if (lowerMsg.includes('email')) {
-        msg = "This identity requires validation or is invalid. Please try another seeker name.";
+        msg = "This identity requires validation or the email format is invalid. Please try another seeker name.";
       } else if (lowerMsg.includes('database error') || lowerMsg.includes('saving new user')) {
-        msg = "The sanctuary encountered a database ripple while saving your profile. Please try a slightly different username.";
+        msg = "The sanctuary encountered a database ripple. This usually means the username is taken but not showing in the index. Try a slightly different name.";
       }
       setError(msg);
     } finally {
